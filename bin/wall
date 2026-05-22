@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Setea wallpaper + regenera paleta matugen + reloadea apps.
+# Uso: wall <ruta-imagen> [dark|light]
+
+set -euo pipefail
+
+WALL="${1:?Uso: wall <ruta-imagen> [dark|light]}"
+MODE="${2:-dark}"
+
+[[ -f "$WALL" ]] || { echo "No existe: $WALL" >&2; exit 1; }
+
+# 1) Generar paleta
+matugen image "$WALL" --mode "$MODE" --prefer saturation
+
+# 2) Reload Hyprland (toma colors.conf via source =)
+command -v hyprctl >/dev/null && hyprctl reload >/dev/null
+
+# 3) Reload kitty (señal SIGUSR1 = recargar config sin reiniciar)
+pgrep -x kitty >/dev/null && pkill -SIGUSR1 -x kitty || true
+
+# 4) Setear wallpaper en Ambxst (si tiene API; si no, usar hyprctl)
+# Ambxst maneja su propio wallpaper — guardamos referencia
+mkdir -p "$HOME/.cache/dotfiles"
+echo "$WALL" > "$HOME/.cache/dotfiles/current-wallpaper"
+
+echo "✔ Paleta regenerada desde: $WALL (modo $MODE)"

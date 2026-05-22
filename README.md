@@ -19,13 +19,31 @@ Configs portadas / inspiradas en [end-4/dots-hyprland](https://github.com/end-4/
 | `config/starship.toml` | end-4 | Prompt para starship. |
 | `config/{chrome,code,thorium}-flags.conf` | end-4 | Flags para Wayland nativo. |
 
-## Lo que NO traje (a propósito)
+## Theming dinámico (matugen)
+
+`config/matugen/` tiene templates Material You que generan colores desde el wallpaper. Templates activos:
+
+- `hyprland/colors.conf` → `~/.config/hypr/colors.conf` (borders, background)
+- `kitty/colors.conf` → `~/.config/kitty/colors.conf` (16 colores ANSI)
+- `fuzzel/fuzzel_theme.ini` → tema dinámico del launcher
+- `gtk-3.0/gtk.css` + `gtk-4.0/gtk.css` → Firefox/Brave/Nautilus
+- `hyprland/hyprlock-colors.conf` → pantalla de bloqueo
+
+Cambiar wallpaper + regenerar paleta:
+
+```bash
+wall ~/Pictures/algo.jpg          # modo dark por defecto
+wall ~/Pictures/algo.jpg light    # modo light
+```
+
+`bin/wall` corre matugen, reloadea Hyprland y le manda SIGUSR1 a kitty.
+
+## Lo que NO traje (todavía)
 
 | | Motivo |
 |---|---|
-| `matugen/` | Generador de colores de end-4. No lo usamos. |
 | `quickshell/` | end-4 shell illogical-impulse — reemplazado por Ambxst. |
-| `Kvantum/`, `kde-material-you-colors/`, `kdeglobals`, `konsolerc`, `dolphinrc`, `darklyrc` | Todos dependen de colores generados por matugen. Rotos sin él. |
+| `Kvantum/`, `kde-material-you-colors/`, `kdeglobals`, `konsolerc`, `dolphinrc`, `darklyrc` | Para apps Qt/KDE. Stack adicional, lo armamos cuando hagan falta. |
 | `fish/` | Uso zsh. |
 
 ## Instalación en máquina nueva

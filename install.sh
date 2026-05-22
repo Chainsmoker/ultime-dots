@@ -18,17 +18,17 @@ for dir in "$SRC"/*/; do
     name=$(basename "$dir")
     target="$DST/$name"
 
-    if [[ -L "$target" ]]; then
-        if [[ "$(readlink "$target")" != "$dir"* ]]; then
-            warn "$target ya es symlink pero a otro lado. Backup."
-            mv "$target" "$target.dotfiles-bak"
-        else
-            ok "$target ya linkeado correctamente"
+    # Si ya es directorio con todos los archivos symlinkeados a este repo, saltar
+    if [[ -d "$target" && ! -L "$target" ]]; then
+        all_linked=1
+        for f in "$dir"*; do
+            fn=$(basename "$f")
+            [[ -L "$target/$fn" && "$(readlink "$target/$fn")" == "$f" ]] || all_linked=0
+        done
+        if [[ $all_linked -eq 1 ]]; then
+            ok "$target ya tiene todo linkeado"
             continue
         fi
-    elif [[ -e "$target" ]]; then
-        warn "$target existe — moviendo a $target.dotfiles-bak"
-        mv "$target" "$target.dotfiles-bak"
     fi
 
     mkdir -p "$target"
@@ -36,7 +36,7 @@ for dir in "$SRC"/*/; do
         fname=$(basename "$file")
         link="$target/$fname"
         if [[ -e "$link" && ! -L "$link" ]]; then
-            mv "$link" "$link.dotfiles-bak"
+            mv "$link" "$link.bak-$(date +%s)"
         fi
         ln -sf "$file" "$link"
         ok "linked $link"
@@ -50,8 +50,8 @@ for file in "$SRC"/*; do
     fname=$(basename "$file")
     link="$DST/$fname"
     if [[ -e "$link" && ! -L "$link" ]]; then
-        warn "$link existe — moviendo a $link.dotfiles-bak"
-        mv "$link" "$link.dotfiles-bak"
+        warn "$link existe — moviendo a $link.bak-$(date +%s)"
+        mv "$link" "$link.bak-$(date +%s)"
     fi
     ln -sf "$file" "$link"
     ok "linked $link"
