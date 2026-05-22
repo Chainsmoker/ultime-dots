@@ -13,9 +13,13 @@ warn() { printf "${YELLOW}⚠  %s${NC}\n" "$*"; }
 
 mkdir -p "$DST"
 
+# Carpetas que NO van a ~/.config (se manejan en bloques especiales abajo)
+declare -A SPECIAL_DIRS=( [zsh-custom]=1 )
+
 # === Carpetas: linkear archivo por archivo ===
 for dir in "$SRC"/*/; do
     name=$(basename "$dir")
+    [[ -n "${SPECIAL_DIRS[$name]:-}" ]] && continue
     target="$DST/$name"
 
     # Si ya es directorio con todos los archivos symlinkeados a este repo, saltar
@@ -56,6 +60,19 @@ for file in "$SRC"/*; do
     ln -sf "$file" "$link"
     ok "linked $link"
 done
+
+# === Casos especiales: snippets que NO van a ~/.config ===
+ZSH_CUSTOM_SRC="$SRC/zsh-custom"
+if [[ -d "$ZSH_CUSTOM_SRC" && -d "$HOME/.oh-my-zsh/custom" ]]; then
+    for f in "$ZSH_CUSTOM_SRC"/*.zsh; do
+        [[ -e "$f" ]] || continue
+        fname=$(basename "$f")
+        link="$HOME/.oh-my-zsh/custom/$fname"
+        [[ -e "$link" && ! -L "$link" ]] && mv "$link" "$link.bak-$(date +%s)"
+        ln -sf "$f" "$link"
+        ok "linked $link"
+    done
+fi
 
 echo
 ok "Listo. Editá ~/.config/* normalmente — son symlinks a este repo."
