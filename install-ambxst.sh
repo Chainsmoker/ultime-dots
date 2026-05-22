@@ -36,11 +36,13 @@ for arg in "$@"; do
 done
 
 # === Config ===
-REPO_URL="${AMBXST_REPO_URL:-https://github.com/Axenide/Ambxst.git}"
+# Por defecto: tu fork con los parches (UX del notch, click workspaces, etc.).
+# Para upstream limpio: AMBXST_REPO_URL=https://github.com/Axenide/Ambxst.git AMBXST_BRANCH=main
+REPO_URL="${AMBXST_REPO_URL:-https://github.com/Chainsmoker/Ambxst.git}"
 UPSTREAM_URL="https://github.com/Axenide/Ambxst.git"
 INSTALL_DIR="${AMBXST_INSTALL_DIR:-$HOME/Repos/Ambxst}"
 LAUNCHER_DIR="${AMBXST_LAUNCHER_DIR:-$HOME/.local/bin}"
-BRANCH="${AMBXST_BRANCH:-main}"
+BRANCH="${AMBXST_BRANCH:-feat/always-show-player}"
 
 # === Helpers ===
 GREEN='\033[0;32m'; BLUE='\033[0;34m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; NC='\033[0m'
