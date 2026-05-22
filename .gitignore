@@ -1,0 +1,9 @@
+# Estado runtime, no se versiona
+*.bak
+*.swp
+*.log
+.DS_Store
+
+# Outputs/cache locales
+cache/
+state/
