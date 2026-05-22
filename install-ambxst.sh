@@ -127,6 +127,8 @@ PKGS=(
     adw-gtk-theme matugen gpu-screen-recorder wl-clip-persist mpvpaper gradia
     # Go: para compilar axctl desde el fork con el fix de Hyprland 0.55+
     go
+    # Icons + folder color dinámico (apply-folder-color)
+    papirus-icon-theme papirus-folders-git
 )
 $AUR -S --needed --noconfirm "${PKGS[@]}"
 
