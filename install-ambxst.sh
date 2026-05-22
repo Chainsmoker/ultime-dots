@@ -207,6 +207,24 @@ case ":$PATH:" in
        warn "    export PATH=\"\$HOME/.local/bin:\$PATH\"" ;;
 esac
 
+# === 8. Sudoers NOPASSWD para papirus-folders ===
+# apply-folder-color (en bin/) lo invoca sin password cuando matugen regenera.
+SUDOERS_FILE="/etc/sudoers.d/papirus-folders"
+if [[ ! -f "$SUDOERS_FILE" ]] && command -v papirus-folders >/dev/null; then
+    info "Configurando NOPASSWD para papirus-folders..."
+    echo "$USER ALL=(ALL) NOPASSWD: /usr/bin/papirus-folders" \
+        | sudo tee "$SUDOERS_FILE" >/dev/null
+    sudo chmod 0440 "$SUDOERS_FILE"
+    ok "Sudoers configurado: $SUDOERS_FILE"
+fi
+
+# === 9. Defaults gsettings (icon theme + dark mode) ===
+if command -v gsettings >/dev/null; then
+    gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface gtk-theme 'adw-gtk3-dark' 2>/dev/null || true
+fi
+
 # === Cierre ===
 ok "Listo."
 cat <<EOF
