@@ -1,0 +1,66 @@
+/* ========================================================================
+ * Estilos extra que sobreviven el GtkGenerator de Ambxst.
+ * Cargado vía @import al principio de gtk.css. Los @define-color de Ambxst
+ * vienen después, así que estos estilos resuelven contra los colores actuales.
+ * ======================================================================== */
+
+/* Window translúcido — Hyprland blurea por debajo */
+window {
+  background: alpha(@window_bg_color, 0.78);
+}
+
+/* Headerbar / titlebar también translúcida */
+headerbar,
+.titlebar,
+.background.csd headerbar {
+  background: alpha(@headerbar_bg_color, 0.72);
+}
+
+/* Sidebar de Nautilus transparente — hereda el blur del window */
+.navigation-sidebar,
+placessidebar,
+placesview {
+  background: transparent;
+}
+
+/* Lista/grid de archivos translúcida */
+.nautilus-list-view,
+.nautilus-grid-view {
+  background: alpha(@view_bg_color, 0.55);
+  border-radius: 16px;
+}
+
+/* Popups un poquito menos translúcidos para legibilidad */
+popover contents,
+popover arrow,
+menubutton popover {
+  background: alpha(@popover_bg_color, 0.92);
+}
+
+/* Path bar de Nautilus con accent */
+.nautilus-pathbar .nautilus-path-button {
+  background: alpha(@accent_color, 0.12);
+  border-radius: 4px;
+}
+
+.nautilus-pathbar .nautilus-path-button:hover {
+  background: alpha(@accent_color, 0.20);
+}
+
+.nautilus-pathbar .nautilus-path-button.current-dir {
+  border-radius: 999px;
+}
+
+/* Sidebar row hover/selected con accent */
+.navigation-sidebar row:hover {
+  background: alpha(@accent_color, 0.10);
+}
+
+.navigation-sidebar row:selected {
+  background: alpha(@accent_color, 0.22);
+}
+
+/* Botones más rounded */
+button {
+  border-radius: 8px;
+}
