@@ -13,12 +13,12 @@ warn() { printf "${YELLOW}⚠  %s${NC}\n" "$*"; }
 
 mkdir -p "$DST"
 
+# === Carpetas: linkear archivo por archivo ===
 for dir in "$SRC"/*/; do
     name=$(basename "$dir")
     target="$DST/$name"
 
     if [[ -L "$target" ]]; then
-        # ya es symlink — asegurarse que apunta acá
         if [[ "$(readlink "$target")" != "$dir"* ]]; then
             warn "$target ya es symlink pero a otro lado. Backup."
             mv "$target" "$target.dotfiles-bak"
@@ -31,7 +31,6 @@ for dir in "$SRC"/*/; do
         mv "$target" "$target.dotfiles-bak"
     fi
 
-    # linkear archivo por archivo (no la carpeta entera)
     mkdir -p "$target"
     for file in "$dir"*; do
         fname=$(basename "$file")
@@ -42,6 +41,20 @@ for dir in "$SRC"/*/; do
         ln -sf "$file" "$link"
         ok "linked $link"
     done
+done
+
+# === Archivos sueltos en config/ ===
+shopt -s nullglob
+for file in "$SRC"/*; do
+    [[ -d "$file" ]] && continue
+    fname=$(basename "$file")
+    link="$DST/$fname"
+    if [[ -e "$link" && ! -L "$link" ]]; then
+        warn "$link existe — moviendo a $link.dotfiles-bak"
+        mv "$link" "$link.dotfiles-bak"
+    fi
+    ln -sf "$file" "$link"
+    ok "linked $link"
 done
 
 echo
