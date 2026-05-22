@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Toma un hex (sin #) o lo lee del @define-color accent_color en gtk-3.0/gtk.css,
+# mapea a un preset de papirus-folders y lo aplica.
+# Uso: apply-folder-color [hex-sin-#]
+
+set -euo pipefail
+
+HEX="${1:-}"
+if [[ -z "$HEX" ]]; then
+    HEX="$(grep -oP '@define-color accent_color #\K[0-9a-fA-F]{6}' \
+             "$HOME/.config/gtk-3.0/gtk.css" 2>/dev/null | head -1)" || true
+fi
+HEX="${HEX#\#}"   # quitar # si lo trajo
+[[ "$HEX" =~ ^[0-9a-fA-F]{6}$ ]] || { echo "apply-folder-color: hex inválido o no encontrado" >&2; exit 1; }
+
+HUE=$(python3 -c "
+import colorsys
+r,g,b = int('$HEX'[0:2],16)/255, int('$HEX'[2:4],16)/255, int('$HEX'[4:6],16)/255
+h,_,_ = colorsys.rgb_to_hls(r,g,b)
+print(int(h*360))
+" 2>/dev/null || echo 240)
+
+if   (( HUE >=  0 && HUE <  15 )); then COLOR=red
+elif (( HUE >= 15 && HUE <  40 )); then COLOR=orange
+elif (( HUE >= 40 && HUE <  70 )); then COLOR=yellow
+elif (( HUE >= 70 && HUE < 150 )); then COLOR=green
+elif (( HUE >=150 && HUE < 190 )); then COLOR=teal
+elif (( HUE >=190 && HUE < 250 )); then COLOR=blue
+elif (( HUE >=250 && HUE < 290 )); then COLOR=violet
+elif (( HUE >=290 && HUE < 330 )); then COLOR=pink
+else COLOR=carmine
+fi
+
+# Evita correr si ya está en ese color (papirus-folders guarda config en /etc)
+LAST=$(awk -F= '/^color/{print $2}' /etc/papirus-folders.conf 2>/dev/null || echo)
+[[ "$LAST" == "$COLOR" ]] && exit 0
+
+sudo -n papirus-folders -C "$COLOR" >/dev/null 2>&1 \
+    && echo "folders → $COLOR (hue $HUE)" \
+    || echo "folders: necesita 'sudo -n papirus-folders -C $COLOR' (sudoers NOPASSWD)" >&2

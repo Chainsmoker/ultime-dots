@@ -18,36 +18,8 @@ command -v hyprctl >/dev/null && hyprctl reload >/dev/null
 # 3) Reload kitty (señal SIGUSR1 = recargar config sin reiniciar)
 pgrep -x kitty >/dev/null && pkill -SIGUSR1 -x kitty || true
 
-# 4) Recolorear folders de Papirus al accent matugen más cercano
-if command -v papirus-folders >/dev/null; then
-    # Sacar el accent del gtk.css generado por matugen
-    ACCENT_HEX="$(grep -oP '@define-color accent_color #\K[0-9a-fA-F]{6}' \
-                    "$HOME/.config/gtk-3.0/gtk.css" 2>/dev/null | head -1)"
-    if [[ -n "$ACCENT_HEX" ]]; then
-        # Mapear HSL hue del accent al color preset más cercano de papirus-folders
-        # Hue del accent (0-360); 30-60 = yellow/orange, 0-30 = red, 60-160 = green, etc.
-        HUE=$(python3 -c "
-import colorsys
-r,g,b = int('${ACCENT_HEX}'[0:2],16)/255, int('${ACCENT_HEX}'[2:4],16)/255, int('${ACCENT_HEX}'[4:6],16)/255
-h,_,_ = colorsys.rgb_to_hls(r,g,b)
-print(int(h*360))
-" 2>/dev/null || echo 240)
-        COLOR=blue
-        if   (( HUE >=  0 && HUE <  15 )); then COLOR=red
-        elif (( HUE >= 15 && HUE <  40 )); then COLOR=orange
-        elif (( HUE >= 40 && HUE <  70 )); then COLOR=yellow
-        elif (( HUE >= 70 && HUE < 150 )); then COLOR=green
-        elif (( HUE >=150 && HUE < 190 )); then COLOR=teal
-        elif (( HUE >=190 && HUE < 250 )); then COLOR=blue
-        elif (( HUE >=250 && HUE < 290 )); then COLOR=violet
-        elif (( HUE >=290 && HUE < 330 )); then COLOR=pink
-        else COLOR=carmine
-        fi
-        sudo -n papirus-folders -C "$COLOR" >/dev/null 2>&1 \
-            && echo "  ↳ folders Papirus → $COLOR (hue $HUE)" \
-            || echo "  ↳ folders: necesita 'sudo -n papirus-folders -C $COLOR' (sudoers NOPASSWD)"
-    fi
-fi
+# 4) Recolorear folders Papirus al accent (delegado a apply-folder-color)
+command -v apply-folder-color >/dev/null && apply-folder-color || true
 
 # 5) Setear wallpaper en Ambxst (si tiene API; si no, usar hyprctl)
 # Ambxst maneja su propio wallpaper — guardamos referencia
