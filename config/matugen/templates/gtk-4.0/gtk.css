@@ -539,3 +539,32 @@ tooltip {
 .image-button.flat arrow {
   background: transparent;
 }
+
+/* ===================================================================
+ * Overrides custom: translucent + Hyprland blur friendly
+ * Estos van AL FINAL para ganar al cascade.
+ * =================================================================== */
+
+window {
+  background: alpha(@window_bg_color, 0.78);
+}
+
+headerbar,
+.titlebar {
+  background: alpha(@headerbar_bg_color, 0.72);
+}
+
+.navigation-sidebar,
+placessidebar {
+  background: transparent;
+}
+
+.nautilus-list-view,
+.nautilus-grid-view {
+  background: alpha(@secondary_sidebar_bg_color, 0.55);
+}
+
+popover contents,
+popover arrow {
+  background: alpha(@secondary_sidebar_bg_color, 0.92);
+}
