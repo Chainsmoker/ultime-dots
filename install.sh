@@ -8,9 +8,19 @@ REPO_ROOT="$PWD"
 SRC="$REPO_ROOT/config"
 DST="$HOME/.config"
 
-GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
+GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; RED='\033[0;31m'; NC='\033[0m'
 ok()   { printf "${GREEN}✔  %s${NC}\n" "$*"; }
 warn() { printf "${YELLOW}⚠  %s${NC}\n" "$*"; }
+info() { printf "${BLUE}ℹ  %s${NC}\n" "$*"; }
+err()  { printf "${RED}✘  %s${NC}\n" "$*"; }
+
+# Flag: --no-packages para saltar la instalación de paquetes (más rápido al re-ejecutar)
+SKIP_PACKAGES=0
+for arg in "$@"; do
+    case "$arg" in
+        --no-packages|-n) SKIP_PACKAGES=1 ;;
+    esac
+done
 
 mkdir -p "$DST"
 
@@ -108,6 +118,71 @@ if [[ -d "$BIN_SRC" ]]; then
         ln -sfn "$file" "$link"
         ok "linked $link"
     done
+fi
+
+# === Paquetes (pacman + AUR helper) ===
+#
+# Instala lo necesario para que el pipeline funcione end-to-end:
+#   - File picker: yazi + previews (ffmpeg, poppler, ffmpegthumbnailer, librsvg)
+#   - Portal File Picker: xdg-desktop-portal-termfilechooser (AUR)
+#   - Bridge matugen → Qt: kde-material-you-colors (AUR)
+#
+# Para saltar esta fase: ./install.sh --no-packages
+if [[ "$SKIP_PACKAGES" -eq 1 ]]; then
+    info "Saltando install de paquetes (--no-packages)"
+elif ! command -v pacman >/dev/null; then
+    warn "pacman no encontrado — esta distro no es Arch-like. Saltando paquetes."
+else
+    PACMAN_PKGS=(yazi ffmpeg poppler ffmpegthumbnailer librsvg)
+    AUR_PKGS=(xdg-desktop-portal-termfilechooser kde-material-you-colors)
+
+    # Filtrar a los que NO están instalados
+    missing_pacman=()
+    for p in "${PACMAN_PKGS[@]}"; do
+        pacman -Qi "$p" >/dev/null 2>&1 || missing_pacman+=("$p")
+    done
+    missing_aur=()
+    for p in "${AUR_PKGS[@]}"; do
+        pacman -Qi "$p" >/dev/null 2>&1 || missing_aur+=("$p")
+    done
+
+    if (( ${#missing_pacman[@]} == 0 && ${#missing_aur[@]} == 0 )); then
+        ok "Todos los paquetes ya están instalados"
+    else
+        echo
+        info "Paquetes a instalar:"
+        (( ${#missing_pacman[@]} )) && echo "    pacman: ${missing_pacman[*]}"
+        (( ${#missing_aur[@]} ))    && echo "    AUR:    ${missing_aur[*]}"
+        echo
+
+        # Detectar AUR helper si hace falta
+        AUR_HELPER=""
+        if (( ${#missing_aur[@]} > 0 )); then
+            for h in paru yay; do
+                if command -v "$h" >/dev/null; then AUR_HELPER="$h"; break; fi
+            done
+            if [[ -z "$AUR_HELPER" ]]; then
+                err "Necesito un AUR helper (paru o yay) para instalar: ${missing_aur[*]}"
+                err "Instalá uno primero: https://github.com/Morganamilo/paru"
+                exit 1
+            fi
+            info "Usando AUR helper: $AUR_HELPER"
+        fi
+
+        # Instalar repos oficiales
+        if (( ${#missing_pacman[@]} > 0 )); then
+            info "Instalando con pacman (te va a pedir password)..."
+            sudo pacman -S --needed --noconfirm "${missing_pacman[@]}"
+            ok "pacman: instalados ${missing_pacman[*]}"
+        fi
+
+        # Instalar AUR
+        if (( ${#missing_aur[@]} > 0 )); then
+            info "Instalando con $AUR_HELPER..."
+            "$AUR_HELPER" -S --needed --noconfirm "${missing_aur[@]}"
+            ok "AUR: instalados ${missing_aur[*]}"
+        fi
+    fi
 fi
 
 echo
