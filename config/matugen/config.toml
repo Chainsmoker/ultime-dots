@@ -26,3 +26,18 @@ output_path = '~/.config/gtk-3.0/gtk.css'
 [templates.gtk4]
 input_path = '~/.config/matugen/templates/gtk-4.0/gtk.css'
 output_path = '~/.config/gtk-4.0/gtk.css'
+
+[templates.yazi]
+input_path = '~/.config/matugen/templates/yazi/theme.toml'
+output_path = '~/.config/yazi/theme.toml'
+
+# === Qt apps (vía kde-material-you-colors) ===
+# Escribe el source color a un archivo que `bin/wall` lee para invocar
+# `kde-material-you-colors`, que regenera el color scheme KDE (kdeglobals).
+# qt6ct.conf usa `style=Breeze` + `custom_palette=false` → cualquier app Qt
+# (qbittorrent, etc.) hereda los colores matugen via KDEPlasmaPlatformTheme6.
+# El FileChooser ya no es Qt (cambiamos a termfilechooser+yazi) pero esto
+# beneficia a todas las otras apps Qt nativas.
+[templates.kde-source-color]
+input_path = '~/.config/matugen/templates/kde/color.txt'
+output_path = '~/.cache/matugen/source-color.txt'

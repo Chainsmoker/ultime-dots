@@ -21,7 +21,11 @@ Cada subcarpeta de `config/` se symlinkea a `~/.config/<nombre>/` por `install.s
 | `xdg-desktop-portal/hyprland-portals.conf` | `~/.config/xdg-desktop-portal/` | Portal para screen share / file pickers |
 | `mpv/mpv.conf` | `~/.config/mpv/mpv.conf` | Video player |
 | `starship.toml` | `~/.config/starship.toml` | Prompt (cross-shell) |
-| `chrome-flags.conf` `code-flags.conf` `thorium-flags.conf` | `~/.config/` | Flags Wayland nativo para Brave/Code/Thorium |
+| `chrome-flags.conf` `code-flags.conf` `thorium-flags.conf` | `~/.config/` | Flags Wayland nativo para Brave/Code/Thorium. **Sin `--gtk-version=4`** para que el FileChooser pase por el portal. |
+| `Kvantum/` | `~/.config/Kvantum/` | Qt widget style. `theme=KvMojave` (translucent + blur). |
+| `xdg-desktop-portal-termfilechooser/` | `~/.config/xdg-desktop-portal-termfilechooser/` | Config del portal File Picker. `cmd=yazi-portal-wrapper` (ver `bin/`). |
+| `yazi/` | `~/.config/yazi/` | TUI file manager. `yazi.toml` + `keymap.toml` trackeados; `theme.toml` matugen-generado (no trackear). |
+| `systemd/user/` | `~/.config/systemd/user/` | User units custom — `hyprland-session.target` (BindsTo graphical-session) + overrides de portales. |
 
 ## WHERE TO LOOK
 
@@ -33,6 +37,9 @@ Cada subcarpeta de `config/` se symlinkea a `~/.config/<nombre>/` por `install.s
 | Terminal colores | `kitty/kitty.conf:7` | `include ./colors.conf` (matugen) |
 | Atajos zsh + alias | `zshrc.d/*.zsh` | Sourceado por home-manager .zshrc |
 | Fallback kitty terminfo | `zsh-custom/kitty-terminfo-fallback.zsh` | Auto-set TERM=xterm-256color al SSH |
+| File picker estilo (yazi colors) | `matugen/templates/yazi/theme.toml` | Regenerado por `wall`. Bind matugen → yazi palette. |
+| File picker terminal | `xdg-desktop-portal-termfilechooser/config` | `cmd=yazi-portal-wrapper`. Cambiar `default_dir` o `create_help_file` acá. |
+| Hyprland-session.target wrapper | `systemd/user/hyprland-session.target` | Wrapper `BindsTo=graphical-session.target` — sin esto, portales fallan |
 
 ## INTEGRACIÓN CON OTRAS PARTES DEL REPO
 

@@ -1,0 +1,47 @@
+# Yazi config — optimizado para uso como file picker via portal.
+# Docs: https://yazi-rs.github.io/docs/configuration/yazi
+
+[mgr]
+ratio          = [1, 4, 3]
+sort_by        = "natural"
+sort_sensitive = false
+sort_reverse   = false
+sort_dir_first = true
+sort_translit  = false
+linemode       = "size"
+show_hidden    = false
+show_symlink   = true
+scrolloff      = 5
+mouse_events   = ["click", "scroll"]
+
+[preview]
+wrap            = "no"
+tab_size        = 2
+max_width       = 600
+max_height      = 900
+cache_dir       = ""
+image_delay     = 30
+image_filter    = "triangle"
+image_quality   = 75
+sixel_fraction  = 15
+ueberzug_scale  = 1
+ueberzug_offset = [0, 0, 0, 0]
+
+[opener]
+edit = [
+    { run = '${EDITOR:=nano} "$@"', desc = "$EDITOR", block = true, for = "unix" },
+]
+open = [
+    { run = 'xdg-open "$@"',        desc = "Open", for = "linux" },
+]
+reveal = [
+    { run = 'xdg-open "$(dirname "$1")"', desc = "Reveal", for = "linux" },
+]
+
+# Previews vienen built-in con yazi:
+#   - Imágenes (PNG/JPG/WEBP/AVIF/GIF/SVG): kitty graphics protocol (auto)
+#   - Videos: thumbnail vía ffmpeg (instalado)
+#   - PDF: poppler-glib (instalar `poppler` si querés)
+#   - Texto/código: syntect (con highlighting)
+# Si querés markdown rendered necesitás un plugin externo, por ej:
+#   ya pkg add yazi-rs/plugins:rich-preview

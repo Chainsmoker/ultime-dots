@@ -1,0 +1,13 @@
+[Unit]
+# Wrapper que activa graphical-session.target en sesiones Hyprland.
+# Hyprland no es display manager (a diferencia de GDM/SDDM) y no levanta
+# graphical-session.target solo. Servicios como `xdg-desktop-portal-*`
+# tienen Requisite o After graphical-session.target — sin esto no arrancan.
+#
+# Se activa vía `exec-once = systemctl --user start hyprland-session.target`
+# en hyprland.conf. BindsTo fuerza graphical-session.target a arrancar.
+Description=Hyprland session
+Documentation=man:systemd.special(7)
+BindsTo=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target

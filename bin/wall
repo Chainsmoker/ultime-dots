@@ -21,6 +21,19 @@ pgrep -x kitty >/dev/null && pkill -SIGUSR1 -x kitty || true
 # 4) Recolorear folders Papirus al accent (delegado a apply-folder-color)
 command -v apply-folder-color >/dev/null && apply-folder-color || true
 
+# 4.5) Bridge matugen → KDE color scheme: cualquier app Qt nativa (qbittorrent,
+#      kcalc, etc.) toma los colores de kdeglobals via plasma-integration.
+#      El FileChooser ya no es Qt (cambiamos a yazi+kitty), pero el bridge
+#      sigue siendo útil para el resto de apps Qt.
+if command -v kde-material-you-colors >/dev/null; then
+    color_file="$HOME/.cache/matugen/source-color.txt"
+    if [[ -f "$color_file" ]]; then
+        src_color=$(tr -d '\n' < "$color_file")
+        mode_flag="-d"; [[ "$MODE" == "light" ]] && mode_flag="-l"
+        kde-material-you-colors "$mode_flag" --color "$src_color" -sv 5 >/dev/null 2>&1 || true
+    fi
+fi
+
 # 5) Setear wallpaper en Ambxst (si tiene API; si no, usar hyprctl)
 # Ambxst maneja su propio wallpaper — guardamos referencia
 mkdir -p "$HOME/.cache/dotfiles"

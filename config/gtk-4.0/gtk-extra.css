@@ -64,3 +64,88 @@ menubutton popover {
 button {
   border-radius: 8px;
 }
+
+/* ========================================================================
+ * GTK4 FileChooser dialog (Brave usa esto con --gtk-version=4).
+ * Re-aplica el lenguaje visual del resto (translúcido + accent + rounded).
+ * ======================================================================== */
+
+/* El dialog en sí: dejá que el window-bg translúcido de arriba se vea */
+filechooser,
+filechooserwidget,
+filechooser > box,
+filechooserwidget > box {
+  background: transparent;
+}
+
+/* Lista/grid de archivos: contenedor con tarjeta translúcida (mismo look que Nautilus) */
+filechooser .view,
+filechooserwidget .view,
+filechooser listview,
+filechooserwidget listview,
+filechooser gridview,
+filechooserwidget gridview {
+  background: alpha(@view_bg_color, 0.55);
+  border-radius: 16px;
+}
+
+/* Filas/items: hover y selección con accent */
+filechooser listview > row,
+filechooserwidget listview > row,
+filechooser gridview > child,
+filechooserwidget gridview > child {
+  border-radius: 8px;
+}
+
+filechooser listview > row:hover,
+filechooserwidget listview > row:hover,
+filechooser gridview > child:hover,
+filechooserwidget gridview > child:hover {
+  background: alpha(@accent_color, 0.10);
+}
+
+filechooser listview > row:selected,
+filechooserwidget listview > row:selected,
+filechooser gridview > child:selected,
+filechooserwidget gridview > child:selected {
+  background: alpha(@accent_color, 0.22);
+}
+
+/* Pathbar superior */
+filechooser pathbar,
+filechooserwidget pathbar {
+  background: transparent;
+}
+
+filechooser pathbar > button,
+filechooserwidget pathbar > button {
+  background: alpha(@accent_color, 0.10);
+  border-radius: 4px;
+}
+
+filechooser pathbar > button:hover,
+filechooserwidget pathbar > button:hover {
+  background: alpha(@accent_color, 0.20);
+}
+
+filechooser pathbar > button.current-dir,
+filechooserwidget pathbar > button.current-dir {
+  border-radius: 999px;
+}
+
+/* Searchbar dentro del file chooser */
+filechooser searchbar,
+filechooserwidget searchbar,
+filechooser searchentry,
+filechooserwidget searchentry {
+  background: alpha(@card_bg_color, 0.7);
+  border-radius: 12px;
+}
+
+/* Action bar inferior (Open / Cancel) */
+filechooser actionbar,
+filechooserwidget actionbar,
+filechooser .dialog-action-area,
+filechooserwidget .dialog-action-area {
+  background: transparent;
+}

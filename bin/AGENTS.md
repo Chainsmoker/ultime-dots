@@ -8,8 +8,9 @@ Scripts que viven en `~/.local/bin/` (linkeados por `install.sh`). Son los **peg
 
 | Script | Rol |
 |---|---|
-| `wall` | Setea wallpaper + regenera paleta + recarga apps |
+| `wall` | Setea wallpaper + regenera paleta + recarga apps (+ bridge KDE/Qt vía kde-material-you-colors) |
 | `apply-folder-color` | Mapea accent matugen → preset color de Papirus folders |
+| `yazi-portal-wrapper` | Wrapper de xdg-desktop-portal-termfilechooser. Lanza kitty + yazi flotante (vía `hyprctl dispatch exec [rules]`) cuando una app pide File Picker. |
 
 ## WHERE TO LOOK
 
@@ -21,6 +22,9 @@ Scripts que viven en `~/.local/bin/` (linkeados por `install.sh`). Son los **peg
 | Mapping hue → preset Papirus | `apply-folder-color:24-32` | Buckets de 30-50° aprox, 9 colores totales |
 | Cache anti-redundante | `apply-folder-color:36-38` | `~/.cache/dotfiles/last-folder-color`, evita correr sudo si ya está aplicado |
 | Invalidación de cache de iconos | `apply-folder-color:46-52` | Toggle `gsettings icon-theme` + `gtk-update-icon-cache` |
+| Bridge matugen → KDE/Qt | `wall:24-34` | Lee `~/.cache/matugen/source-color.txt` y llama `kde-material-you-colors` |
+| File Picker (yazi vía portal) | `yazi-portal-wrapper` | Usa `hyprctl dispatch exec [float;size;pin]` para spawn-time rules (workaround Hyprland #12808). Marker file con `trap EXIT` para cleanup robusto. |
+| Class del picker window | `yazi-portal-wrapper:40` | `--class=termfilechooser-portal` (no hace falta windowrule en hyprland.conf, va inline) |
 
 ## CONVENTIONS
 

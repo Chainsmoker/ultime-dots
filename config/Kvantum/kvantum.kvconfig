@@ -1,0 +1,6 @@
+[General]
+# KvMojave: theme Kvantum oscuro translúcido con blur. ACTUALMENTE INACTIVO —
+# qt6ct.conf usa `style=Breeze` (no kvantum) porque Breeze respeta los colores
+# de kdeglobals (matugen) mientras que Kvantum los hardcodea en su SVG.
+# Se deja por si querés volver a probar Kvantum: cambiar qt6ct.conf:style=kvantum.
+theme=KvMojave

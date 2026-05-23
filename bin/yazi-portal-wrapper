@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Wrapper custom para xdg-desktop-portal-termfilechooser → kitty + yazi.
+#
+# Por qué custom y no el oficial:
+# 1. Hyprland 0.55.2 ignora windowrules en muchos windows nuevos. Usamos
+#    `hyprctl dispatch exec [float;size;center;opacity]` que aplica reglas
+#    al spawn-time (cero flicker).
+# 2. Manejo limpio de cancel: si yazi muere por SIGTERM (Super+Q en
+#    Hyprland) limpiamos chooser-file para que la app llamadora reciba
+#    "ninguna selección".
+#
+# Args del portal (hunkyburrito fork):
+#   $1 multiple, $2 directory, $3 save, $4 path, $5 out
+
+set -e
+
+MULTIPLE="${1:-0}"
+DIRECTORY="${2:-0}"
+SAVE="${3:-0}"
+TARGET_PATH="${4:-$HOME}"
+OUT="${5:?portal must provide output file path}"
+# $6 = verbosity (ignorado por nosotros)
+
+# Markers
+WORK_DIR="$(mktemp -d /tmp/yazi-portal.XXXXXX)"
+DONE="$WORK_DIR/done"
+EXIT_CODE="$WORK_DIR/code"
+INNER="$WORK_DIR/inner.sh"
+
+# Cleanup en cualquier exit. Si la portal nos aborta con SIGTERM también
+# cerramos limpio (matando la kitty pinned para que no quede huérfana).
+cleanup_wrapper() {
+    rm -rf "$WORK_DIR"
+    # Cerrar cualquier kitty del picker que haya quedado huérfana
+    hyprctl dispatch closewindow class:termfilechooser-portal >/dev/null 2>&1 || true
+}
+trap cleanup_wrapper EXIT
+trap 'exit 130' TERM INT
+
+# Construir args de yazi según el modo
+case "$SAVE$DIRECTORY" in
+    1*) YAZI_ARGS=(--chooser-file="$OUT" "$TARGET_PATH") ;;
+    *1) YAZI_ARGS=(--chooser-file="$OUT" --cwd-file="${OUT}.1" "$TARGET_PATH") ;;
+    *)  YAZI_ARGS=(--chooser-file="$OUT" "$TARGET_PATH") ;;
+esac
+
+# Inner script — evita quoting-hell pasando args por archivo.
+# trap EXIT garantiza que marker y exit code se escriban aunque la kitty
+# sea matada con SIGTERM/SIGKILL (Super+Q, kill -9, etc.) → el wrapper
+# nunca queda colgado polleando un marker que nunca llegaría.
+cat > "$INNER" <<EOF
+#!/usr/bin/env bash
+exit_code=1
+cleanup() { echo "\$exit_code" > "$EXIT_CODE"; touch "$DONE"; }
+trap cleanup EXIT
+yazi "\$@"
+exit_code=\$?
+EOF
+chmod +x "$INNER"
+
+# Lanzar kitty vía hyprctl con rules inline. Cero flicker — Hyprland aplica
+# las rules al spawn-time, las windowrules normales no aplican en 0.55.2.
+#
+# `pin` es CRÍTICO: sin él, la kitty se abre en la workspace que Hyprland
+# considere "current" al momento del exec, que no necesariamente es la del
+# user (la app llamadora puede estar en otra). Pin = visible en TODAS las
+# workspaces → el user siempre la ve.
+hyprctl dispatch exec \
+"[float;size 1000 680;center;opacity 0.92 0.88;pin] \
+kitty --class=termfilechooser-portal --title=Pick \
+--override window_padding_width=8 \
+-- $INNER ${YAZI_ARGS[*]@Q}" > /dev/null
+
+# Esperar a que yazi termine (poll del marker)
+while [[ ! -f "$DONE" ]]; do
+    sleep 0.1
+done
+
+YAZI_EXIT="$(cat "$EXIT_CODE" 2>/dev/null || echo 1)"
+
+# Si yazi murió por señal (Super+Q en Hyprland → SIGTERM a kitty → señal a
+# yazi), limpiar chooser-file para que la app llamadora no abra/suba nada.
+if [[ "$YAZI_EXIT" != "0" ]]; then
+    : > "$OUT"
+    [[ "$DIRECTORY" == "1" ]] && rm -f "${OUT}.1"
+    exit 0
+fi
+
+# Directory mode: si yazi no escribió a $OUT pero sí a ${OUT}.1 (cwd-file
+# al hacer `q` desde un dir), usamos ese.
+if [[ "$DIRECTORY" == "1" ]]; then
+    if [[ ! -s "$OUT" && -s "${OUT}.1" ]]; then
+        cat "${OUT}.1" > "$OUT"
+    fi
+    rm -f "${OUT}.1"
+fi

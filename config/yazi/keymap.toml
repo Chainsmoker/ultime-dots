@@ -1,0 +1,29 @@
+# Keymap de yazi.
+# Configurado para uso como file picker via xdg-desktop-portal-termfilechooser:
+# - q / Esc / Ctrl+C  = cancel (no escribe nada al chooser-file/cwd-file)
+# - Y                 = confirma directorio actual (en dir-pick mode)
+# - Enter sobre file  = confirma file pick (default de yazi)
+#
+# Las otras combos son los defaults de yazi.
+
+[[mgr.prepend_keymap]]
+on   = "q"
+run  = "quit --no-cwd-file"
+desc = "Cancelar picker (no escribe nada)"
+
+[[mgr.prepend_keymap]]
+on   = "<Esc>"
+run  = "quit --no-cwd-file"
+desc = "Cancelar picker (no escribe nada)"
+
+[[mgr.prepend_keymap]]
+on   = "<C-c>"
+run  = "quit --no-cwd-file"
+desc = "Cancelar picker (no escribe nada)"
+
+# Confirmar directorio actual (para "Open Folder" desde VSCode/Brave/etc).
+# Default `q` ya no hace esto — ahora cancela. Usá Y para confirmar dir.
+[[mgr.prepend_keymap]]
+on   = "Y"
+run  = "quit"
+desc = "Confirmar directorio actual (dir-pick mode)"
