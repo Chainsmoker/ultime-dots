@@ -92,11 +92,11 @@ Cada subcarpeta crítica tiene su propio AGENTS.md.
 - ❌ **Agregar carpetas a `config/` que no sean parte de tu config personal** — `install.sh` las symlinkea automáticamente. No metas `Cache/`, `state/`, etc.
 - ❌ **Hardcodear paths absolutos en `bin/`** — usá `$HOME` y `$XDG_*` env vars para que sea portable a otra máquina.
 - ❌ **Arrancar `axctl daemon` manualmente** desde `hyprland.conf` con `exec-once` — Ambxst spawnea su propio daemon vía `AxctlService.qml`. Tener dos hace que ambos compitan por el socket `/tmp/axctl-1000.sock` y los widgets dejan de responder a clicks.
-- ❌ **Patchear directamente `~/Repos/Ambxst/`** sin commit — perdés los cambios cuando el script de update hace `git checkout`. Trabajá siempre en la branch `feat/always-show-player` del fork `Chainsmoker/Ambxst` y hacé commits.
+- ❌ **Patchear directamente `~/Repos/Ambxst/`** sin commit — perdés los cambios cuando el script de update hace `git checkout`. Trabajá siempre en la branch `main` del fork `Chainsmoker/Ambxst` y hacé commits.
 
 ## FORKS RELACIONADOS
 
-- **`Chainsmoker/Ambxst`** branch `feat/always-show-player` — shell QML con UX patches:
+- **`Chainsmoker/Ambxst`** branch `main` — shell QML con UX patches:
   - CompactPlayer: muestra player cuando hay media activa
   - PositionSlider: ondas más gruesas
   - Workspaces: Button → Item para que clicks lleguen
