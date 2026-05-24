@@ -104,5 +104,7 @@ Cada subcarpeta crítica tiene su propio AGENTS.md.
   - ScrollingWorkspace: single-tap en empty workspace
   - GtkGenerator: prepende @import gtk-extra.css y llama apply-folder-color
   - SideNotch + ChatPanel (en `modules/widgets/controlpanel/`)
+  - LeftDock (News & Security): migración de Redis a Reddit (con icono dinámico), integración de NewsAPI.org para noticias tecnológicas de alta calidad con imágenes locales, redirección clicable al navegador adaptada a formatos de vulnerabilidad (CVE/RHSA/GHSA/MAL) con cursor interactivo, y scroll animado ultra-suave.
+
 
 - **`Chainsmoker/axctl`** branch `fix/hyprland-dispatcher` — fix Go que reemplaza `hl.dsp.*` (Lua scripting) por `dispatch workspace/togglespecialworkspace` plain. Sin esto, `axctl workspace switch N` retorna "Success" pero no hace nada en Hyprland mainline (Axenide/axctl#3, PR Axenide/axctl#5).
