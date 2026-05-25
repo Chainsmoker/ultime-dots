@@ -31,9 +31,19 @@ output_path = '~/.config/gtk-4.0/gtk.css'
 input_path = '~/.config/matugen/templates/yazi/theme.toml'
 output_path = '~/.config/yazi/theme.toml'
 
+[templates.fzf]
+input_path = '~/.config/matugen/templates/fzf/colors.zsh'
+output_path = '~/.cache/matugen/fzf-colors.zsh'
+
 [templates.helix]
 input_path = '~/.config/matugen/templates/helix/theme.toml'
 output_path = '~/.config/helix/themes/matugen.toml'
+
+# Satty (anotador de capturas). Satty hardcodea sus barras a negro y NO usa el
+# tema GTK; sí lee ~/.config/satty/overrides.css, que reescribimos aquí.
+[templates.satty]
+input_path = '~/.config/matugen/templates/satty/overrides.css'
+output_path = '~/.config/satty/overrides.css'
 
 # === Qt apps (vía kde-material-you-colors) ===
 # Escribe el source color a un archivo que `bin/wall` lee para invocar

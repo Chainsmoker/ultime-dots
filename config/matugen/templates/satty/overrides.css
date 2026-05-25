@@ -1,0 +1,33 @@
+/* ════════════════════════════════════════════════════════════════
+ * Satty — overrides de tema. GENERADO POR MATUGEN, no editar a mano.
+ * Fuente: ~/.config/matugen/templates/satty/overrides.css
+ *
+ * Satty trae sus barras hardcodeadas a negro (.toolbar / .toast con
+ * background #00000099). Este archivo, que satty lee desde
+ * ~/.config/satty/overrides.css, las reemplaza con la paleta
+ * Material You actual para que combine con el resto del rice.
+ * Selectores soportados por satty: .root .toolbar .toolbar-top
+ * .toolbar-bottom .toast
+ * ════════════════════════════════════════════════════════════════ */
+
+/* Lienzo detrás de la captura */
+.root {
+  background: {{colors.surface.default.hex}};
+}
+
+/* Barras de herramientas (arriba y abajo) — translúcidas; Hyprland blurea debajo */
+.toolbar {
+  color: {{colors.on_surface.default.hex}};
+  background: rgba({{colors.surface_container_high.default.red}}, {{colors.surface_container_high.default.green}}, {{colors.surface_container_high.default.blue}}, 0.92);
+  border: 1px solid rgba({{colors.primary.default.red}}, {{colors.primary.default.green}}, {{colors.primary.default.blue}}, 0.22);
+}
+
+.toolbar-top    { border-radius: 0 0 10px 10px; }
+.toolbar-bottom { border-radius: 10px 10px 0 0; }
+
+/* Toast "Copied to clipboard" */
+.toast {
+  color: {{colors.on_surface.default.hex}};
+  background: rgba({{colors.surface_container_high.default.red}}, {{colors.surface_container_high.default.green}}, {{colors.surface_container_high.default.blue}}, 0.96);
+  border: 1px solid rgba({{colors.primary.default.red}}, {{colors.primary.default.green}}, {{colors.primary.default.blue}}, 0.30);
+}
