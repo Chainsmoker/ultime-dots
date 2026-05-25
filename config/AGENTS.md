@@ -15,7 +15,7 @@ Cada subcarpeta de `config/` se symlinkea a `~/.config/<nombre>/` por `install.s
 | `foot/` | `~/.config/foot/` | Terminal alternativo |
 | `fuzzel/` | `~/.config/fuzzel/` | Launcher fallback. fuzzel_theme.ini regenerado por matugen |
 | `wlogout/` | `~/.config/wlogout/` | Menú salir. layout + style.css |
-| `zshrc.d/` | `~/.config/zshrc.d/` | Snippets que home-manager sourcea |
+| `zshrc.d/` | `~/.config/zshrc.d/` | Snippets de configuración para Zsh |
 | `zsh-custom/` | `~/.oh-my-zsh/custom/` | oh-my-zsh customs (auto-sourced). Fix kitty-terminfo vive acá |
 | `fontconfig/fonts.conf` | `~/.config/fontconfig/fonts.conf` | Sustituciones de fuentes |
 | `xdg-desktop-portal/hyprland-portals.conf` | `~/.config/xdg-desktop-portal/` | Portal para screen share / file pickers |
@@ -35,7 +35,7 @@ Cada subcarpeta de `config/` se symlinkea a `~/.config/<nombre>/` por `install.s
 | Atajos del compositor | `hypr/hyprland.conf:222+` | Keybinds bajo "Keybinds" |
 | Animaciones Hyprland | `hypr/hyprland.conf` `bezier` + `animations` | Curves Material 3 importados de end-4 |
 | Terminal colores | `kitty/kitty.conf:7` | `include ./colors.conf` (matugen) |
-| Atajos zsh + alias | `zshrc.d/*.zsh` | Sourceado por home-manager .zshrc |
+| Atajos zsh + alias | zshrc.d/*.zsh | Snippets de Zsh (cargados por zshrc) |
 | Fallback kitty terminfo | `zsh-custom/kitty-terminfo-fallback.zsh` | Auto-set TERM=xterm-256color al SSH |
 | File picker estilo (yazi colors) | `matugen/templates/yazi/theme.toml` | Regenerado por `wall`. Bind matugen → yazi palette. |
 | File picker terminal | `xdg-desktop-portal-termfilechooser/config` | `cmd=yazi-portal-wrapper`. Cambiar `default_dir` o `create_help_file` acá. |
@@ -67,4 +67,4 @@ Cada subcarpeta de `config/` se symlinkea a `~/.config/<nombre>/` por `install.s
 
 - ❌ **Symlinkear carpetas enteras** en vez de archivo-por-archivo — `install.sh` lo hace adrede para no contaminar `~/.config/<app>/` con archivos del repo que no querés.
 - ❌ **Editar archivos generados por matugen** (`gtk.css`, `colors.conf`, `fuzzel_theme.ini`) directamente — se regeneran al cambiar wallpaper. Tus cambios se pierden.
-- ❌ **Usar `.bashrc` para zsh-only configs** — usar `.zshrc.d/*.zsh`. home-manager los sourcea automáticamente.
+- ❌ **Usar `.bashrc` para zsh-only configs** — usar `.zshrc.d/*.zsh` (se cargan automáticamente por el zshrc del repo).

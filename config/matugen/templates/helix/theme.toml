@@ -1,0 +1,67 @@
+# Generado por matugen — NO editar a mano.
+
+"ui.background" = { bg = "{{colors.surface.default.hex}}" }
+"ui.text" = { fg = "{{colors.on_surface.default.hex}}" }
+
+"ui.cursor" = { bg = "{{colors.primary.default.hex}}", fg = "{{colors.on_primary.default.hex}}" }
+"ui.cursor.match" = { fg = "{{colors.secondary.default.hex}}", modifiers = ["bold"] }
+"ui.cursor.primary" = { bg = "{{colors.primary.default.hex}}", fg = "{{colors.on_primary.default.hex}}" }
+
+"ui.selection" = { bg = "{{colors.surface_variant.default.hex}}" }
+
+"ui.linenr" = { fg = "{{colors.outline.default.hex}}" }
+"ui.linenr.selected" = { fg = "{{colors.primary.default.hex}}", modifiers = ["bold"] }
+
+"ui.statusline" = { bg = "{{colors.surface_container.default.hex}}", fg = "{{colors.on_surface.default.hex}}" }
+"ui.statusline.inactive" = { bg = "{{colors.surface.default.hex}}", fg = "{{colors.outline.default.hex}}" }
+"ui.statusline.normal" = { bg = "{{colors.primary.default.hex}}", fg = "{{colors.on_primary.default.hex}}", modifiers = ["bold"] }
+"ui.statusline.insert" = { bg = "{{colors.tertiary.default.hex}}", fg = "{{colors.on_tertiary.default.hex}}", modifiers = ["bold"] }
+"ui.statusline.select" = { bg = "{{colors.secondary.default.hex}}", fg = "{{colors.on_secondary.default.hex}}", modifiers = ["bold"] }
+
+"ui.popup" = { bg = "{{colors.surface_container_high.default.hex}}" }
+"ui.window" = { fg = "{{colors.outline_variant.default.hex}}" }
+"ui.help" = { bg = "{{colors.surface_container.default.hex}}", fg = "{{colors.on_surface.default.hex}}" }
+"ui.menu" = { fg = "{{colors.on_surface.default.hex}}", bg = "{{colors.surface_container.default.hex}}" }
+"ui.menu.selected" = { fg = "{{colors.on_primary.default.hex}}", bg = "{{colors.primary.default.hex}}" }
+
+"keyword" = "{{colors.primary.default.hex}}"
+"keyword.control" = "{{colors.primary.default.hex}}"
+"keyword.directive" = "{{colors.tertiary.default.hex}}"
+"type" = "{{colors.secondary.default.hex}}"
+"function" = "{{colors.tertiary.default.hex}}"
+"function.builtin" = "{{colors.tertiary.default.hex}}"
+"string" = "{{colors.primary.default.hex}}"
+"comment" = { fg = "{{colors.outline.default.hex}}", modifiers = ["italic"] }
+"variable" = "{{colors.on_surface.default.hex}}"
+"variable.builtin" = "{{colors.secondary.default.hex}}"
+"constant" = "{{colors.secondary.default.hex}}"
+"constant.numeric" = "{{colors.secondary.default.hex}}"
+"constant.character.escape" = "{{colors.tertiary.default.hex}}"
+"operator" = "{{colors.on_surface.default.hex}}"
+"punctuation" = "{{colors.outline.default.hex}}"
+"punctuation.delimiter" = "{{colors.outline.default.hex}}"
+"punctuation.bracket" = "{{colors.on_surface_variant.default.hex}}"
+"label" = "{{colors.tertiary.default.hex}}"
+"namespace" = "{{colors.secondary.default.hex}}"
+
+"ui.virtual.whitespace" = { fg = "{{colors.outline_variant.default.hex}}" }
+"ui.virtual.inlay-hint" = { fg = "{{colors.outline.default.hex}}", modifiers = ["italic"] }
+"ui.virtual.ruler" = { bg = "{{colors.surface_variant.default.hex}}" }
+
+"markup.heading" = "{{colors.primary.default.hex}}"
+"markup.list" = "{{colors.secondary.default.hex}}"
+"markup.bold" = { fg = "{{colors.primary.default.hex}}", modifiers = ["bold"] }
+"markup.italic" = { fg = "{{colors.secondary.default.hex}}", modifiers = ["italic"] }
+"markup.link.url" = { fg = "{{colors.tertiary.default.hex}}", modifiers = ["underlined"] }
+"markup.link.text" = "{{colors.primary.default.hex}}"
+"markup.quote" = "{{colors.tertiary.default.hex}}"
+"markup.raw" = "{{colors.secondary.default.hex}}"
+
+"diagnostic.hint" = { underline = { color = "{{colors.primary.default.hex}}", style = "curl" } }
+"diagnostic.info" = { underline = { color = "{{colors.secondary.default.hex}}", style = "curl" } }
+"diagnostic.warning" = { underline = { color = "{{colors.tertiary.default.hex}}", style = "curl" } }
+"diagnostic.error" = { underline = { color = "{{colors.error.default.hex}}", style = "curl" } }
+"info" = "{{colors.secondary.default.hex}}"
+"hint" = "{{colors.primary.default.hex}}"
+"warning" = "{{colors.tertiary.default.hex}}"
+"error" = "{{colors.error.default.hex}}"

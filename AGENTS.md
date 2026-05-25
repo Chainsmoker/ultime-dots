@@ -17,8 +17,9 @@ ultime-dots/
 ├── AGENTS.md                 ← este archivo
 ├── UPDATE.md                 ← cómo sincronizar con upstream
 ├── README.md                 ← intro pública
-├── install.sh                ← crea symlinks config/* → ~/.config/*
+├── install.sh                ← crea symlinks config/* → ~/.config/* y zshrc → ~/.zshrc
 ├── install-ambxst.sh         ← instala Hyprland, deps, axctl compilado, Ambxst
+├── zshrc                     ← configuración base de Zsh para entornos sin Nix
 ├── bin/                      ← scripts que viven en ~/.local/bin
 │   ├── wall                  ← cambiar wallpaper + regenerar paleta
 │   ├── apply-folder-color    ← mapea accent matugen → preset Papirus folders
@@ -31,7 +32,7 @@ ultime-dots/
     ├── fuzzel/               ← launcher fallback
     ├── wlogout/              ← menú salir
     ├── zshrc.d/              ← snippets bash/zsh (incluye fix kitty-terminfo)
-    ├── zsh-custom/           ← oh-my-zsh custom (sigue cargado por nix-zshrc)
+    ├── zsh-custom/           ← oh-my-zsh custom (cargado por zshrc)
     ├── fontconfig/           ← font fallbacks
     ├── xdg-desktop-portal/   ← portal Hyprland
     ├── mpv/                  ← video player

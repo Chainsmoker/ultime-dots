@@ -31,6 +31,10 @@ output_path = '~/.config/gtk-4.0/gtk.css'
 input_path = '~/.config/matugen/templates/yazi/theme.toml'
 output_path = '~/.config/yazi/theme.toml'
 
+[templates.helix]
+input_path = '~/.config/matugen/templates/helix/theme.toml'
+output_path = '~/.config/helix/themes/matugen.toml'
+
 # === Qt apps (vía kde-material-you-colors) ===
 # Escribe el source color a un archivo que `bin/wall` lee para invocar
 # `kde-material-you-colors`, que regenera el color scheme KDE (kdeglobals).

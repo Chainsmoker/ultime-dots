@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# term-fetch — Random pokemon / animated series art on terminal startup.
+# Uses kitty +kitten icat for native image display.
+# Populates cache (~/.cache/term-art/) on first run.
+#
+# Sources (all transparent PNG sprites, no background):
+#   - Pokemon:  PokeAPI official artwork (GitHub CDN, gens 1-9)
+#   - Add more animated series here: just add URLs pointing to
+#     transparent PNG sprites/artwork.
+
+set -uo pipefail
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/term-art"
+ART_WIDTH="${TERM_ART_WIDTH:-20}"
+ART_HEIGHT="${TERM_ART_HEIGHT:-10}"
+REFRESH_ODDS="${TERM_ART_REFRESH_ODDS:-8}"
+POKEMON_COUNT=1025  # up to gen 9
+
+mkdir -p "$CACHE_DIR"
+
+# ── Fetch ───────────────────────────────────────────────────────
+
+_populate_cache() {
+    echo "  Populating art cache..." >&2
+    local count=0
+
+    # Pokemon official artwork (no background, transparent PNG)
+    for i in $(shuf -i 1-"$POKEMON_COUNT" -n 35); do
+        curl -sSL --max-time 10 \
+            -o "${CACHE_DIR}/pokemon-${i}.png" \
+            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i}.png" \
+            &>/dev/null &
+        count=$((count + 1))
+    done
+
+    # ── Add more animated series below ──
+    # Format: curl PNG into ${CACHE_DIR}/<series>-<id>.png
+    # Make sure images are transparent (no background) like pokemon artwork.
+    #
+    # Example — Digimon (if an official sprite CDN existed):
+    # for i in $(shuf -i 1-200 -n 10); do
+    #     curl -sSL --max-time 10 \
+    #         -o "${CACHE_DIR}/digimon-${i}.png" \
+    #         "https://example.com/digimon/${i}.png" \
+    #         &>/dev/null &
+    #     count=$((count + 1))
+    # done
+
+    wait || true
+    echo "  Cached ${count} images" >&2
+}
+
+_refresh_one() {
+    (
+        local pid=$((RANDOM % POKEMON_COUNT + 1))
+        curl -sSL --max-time 10 \
+            -o "${CACHE_DIR}/pokemon-${pid}.png" \
+            "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pid}.png" \
+            &>/dev/null || true
+    ) &>/dev/null &
+    disown
+}
+
+# ── Main ───────────────────────────────────────────────────────
+
+[[ -n "${KITTY_WINDOW_ID:-}" ]] || exit 0
+
+shopt -s nullglob
+pngs=( "${CACHE_DIR}"/*.png )
+if [[ ${#pngs[@]} -eq 0 ]]; then
+    _populate_cache
+    pngs=( "${CACHE_DIR}"/*.png )
+fi
+shopt -u nullglob
+
+[[ ${#pngs[@]} -gt 0 ]] || exit 0
+
+# Pick random image
+img="${pngs[$((RANDOM % ${#pngs[@]}))]}"
+
+# Display centered, moderate size
+kitty +kitten icat \
+    --stdin no \
+    --align center \
+    --place "${ART_WIDTH}x${ART_HEIGHT}@0x0" \
+    --scale-up \
+    "$img" 2>/dev/null || true
+
+# Push prompt below the image
+printf '\n%.0s' $(seq 1 "$ART_HEIGHT")
+
+# Occasional background refresh
+if [[ $((RANDOM % REFRESH_ODDS)) -eq 0 ]]; then
+    _refresh_one
+fi

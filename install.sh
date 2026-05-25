@@ -85,6 +85,19 @@ if [[ -d "$ZSH_CUSTOM_SRC" && -d "$HOME/.oh-my-zsh/custom" ]]; then
     done
 fi
 
+# === Linkear zshrc (para entornos sin Nix) ===
+ZSHRC_SRC="$REPO_ROOT/zshrc"
+if [[ -f "$ZSHRC_SRC" ]]; then
+    ZSHRC_DST="$HOME/.zshrc"
+    if [[ -e "$ZSHRC_DST" && ! -L "$ZSHRC_DST" ]]; then
+        warn "$ZSHRC_DST existe — moviendo a $ZSHRC_DST.bak-$(date +%s)"
+        mv "$ZSHRC_DST" "$ZSHRC_DST.bak-$(date +%s)"
+    fi
+    ln -sf "$ZSHRC_SRC" "$ZSHRC_DST"
+    ok "linked $ZSHRC_DST"
+fi
+
+
 # === systemd user units (preserva subdirs como *.service.d/override.conf) ===
 SYSTEMD_SRC="$SRC/systemd"
 SYSTEMD_DST="$DST/systemd"
