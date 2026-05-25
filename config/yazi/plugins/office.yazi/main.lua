@@ -2,6 +2,8 @@
 
 local M = {}
 
+local emit = ya.emit or ya.mgr_emit or ya.manager_emit
+
 function M:peek(job)
 	local start, cache = os.clock(), ya.file_cache(job)
 	if not cache then
@@ -22,7 +24,7 @@ function M:seek(job)
 	local h = cx.active.current.hovered
 	if h and h.url == job.file.url then
 		local step = ya.clamp(-1, job.units, 1)
-		ya.manager_emit("peek", { math.max(0, cx.active.preview.skip + step), only_if = job.file.url })
+		emit("peek", { math.max(0, cx.active.preview.skip + step), only_if = job.file.url })
 	end
 end
 
@@ -34,7 +36,7 @@ function M:doc2pdf(job)
 	  2. Always writes the converted files to the filesystem, so no "Mario|Bros|Piping|Magic" for the data stream (https://ask.libreoffice.org/t/using-convert-to-output-to-stdout/38753)
 	  3. The `pdf:draw_pdf_Export` filter needs literal double quotes when defining its options (https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html?&DbPAR=SHARED&System=UNIX#generaltext/shared/guide/pdf_params.xhp)
 	  3.1 Regarding double quotes and Lua strings, see https://www.lua.org/manual/5.1/manual.html#2.1 --]]
-	local libreoffice = Command("libreoffice")
+	local libreoffice, err = Command("libreoffice")
 		:arg({
 			"--headless",
 			"--convert-to",
@@ -47,6 +49,27 @@ function M:doc2pdf(job)
 		:stdout(Command.PIPED)
 		:stderr(Command.PIPED)
 		:output()
+
+	if not libreoffice then
+		local nix_path = os.getenv("HOME") .. "/.nix-profile/bin/libreoffice"
+		libreoffice, err = Command(nix_path)
+			:arg({
+				"--headless",
+				"--convert-to",
+				'pdf:draw_pdf_Export:{"PageRange":{"type":"string","value":"' .. job.skip + 1 .. '"}}',
+				"--outdir",
+				tmp,
+				tostring(job.file.url),
+			})
+			:stdin(Command.NULL)
+			:stdout(Command.PIPED)
+			:stderr(Command.PIPED)
+			:output()
+	end
+
+	if not libreoffice then
+		return nil, Err("Failed to start `libreoffice`: %s. Is LibreOffice installed?", err or "unknown error")
+	end
 
 	if not libreoffice.status.success then
 		local output = libreoffice.stdout .. libreoffice.stderr
@@ -93,6 +116,23 @@ function M:preload(job)
 		:stderr(Command.PIPED)
 		:output()
 
+	if not output then
+		local nix_pdftoppm = os.getenv("HOME") .. "/.nix-profile/bin/pdftoppm"
+		output, err = Command(nix_pdftoppm)
+			:arg({
+				"-singlefile",
+				"-jpeg",
+				"-jpegopt",
+				"quality=" .. rt.preview.image_quality,
+				"-f",
+				1,
+				tostring(tmp_pdf),
+			})
+			:stdout(Command.PIPED)
+			:stderr(Command.PIPED)
+			:output()
+	end
+
 	local rm_tmp_pdf, rm_err = fs.remove("file", Url(tmp_pdf))
 	if not rm_tmp_pdf then
 		return true, Err("Failed to remove %s, error: %s", tmp_pdf, rm_err)
@@ -103,7 +143,7 @@ function M:preload(job)
 	elseif not output.status.success then
 		local pages = tonumber(output.stderr:match("the last page %((%d+)%)")) or 0
 		if job.skip > 0 and pages > 0 then
-			ya.mgr_emit("peek", { math.max(0, pages - 1), only_if = job.file.url, upper_bound = true })
+			emit("peek", { math.max(0, pages - 1), only_if = job.file.url, upper_bound = true })
 		end
 		return true, Err("Failed to convert %s to image, stderr: %s", tmp_pdf, output.stderr)
 	end
