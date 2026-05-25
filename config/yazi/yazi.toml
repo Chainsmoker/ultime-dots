@@ -45,3 +45,19 @@ reveal = [
 #   - Texto/código: syntect (con highlighting)
 # Si querés markdown rendered necesitás un plugin externo, por ej:
 #   ya pkg add yazi-rs/plugins:rich-preview
+
+[plugin]
+prepend_preloaders = [
+    { mime = "application/openxmlformats-officedocument.*", run = "office" },
+    { mime = "application/oasis.opendocument.*", run = "office" },
+    { mime = "application/ms-*", run = "office" },
+    { mime = "application/msword", run = "office" },
+]
+
+prepend_previewers = [
+    { mime = "application/openxmlformats-officedocument.*", run = "office" },
+    { mime = "application/oasis.opendocument.*", run = "office" },
+    { mime = "application/ms-*", run = "office" },
+    { mime = "application/msword", run = "office" },
+]
+
