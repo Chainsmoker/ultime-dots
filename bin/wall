@@ -21,6 +21,9 @@ pgrep -x kitty >/dev/null && pkill -SIGUSR1 -x kitty || true
 # 4) Recolorear folders Papirus al accent (delegado a apply-folder-color)
 command -v apply-folder-color >/dev/null && apply-folder-color || true
 
+# (El cursor Bibata se recolorea via el post_hook del template cursor-accent de
+#  matugen — corre en CUALQUIER cambio de paleta, no solo desde este script.)
+
 # 4.5) Bridge matugen → KDE color scheme: cualquier app Qt nativa (qbittorrent,
 #      kcalc, etc.) toma los colores de kdeglobals via plasma-integration.
 #      El FileChooser ya no es Qt (cambiamos a yazi+kitty), pero el bridge

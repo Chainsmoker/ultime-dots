@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""Recolorea Bibata Modern con el accent de matugen y lo instala como cursor activo.
+
+Mapeo (cuerpo acento): relleno=#00FF00→primary, borde=#0000FF→negro, detalle=#FF0000→blanco.
+
+Clave: Hyprland (y GTK/Qt) CACHEAN el theme de cursor por NOMBRE. Si reconstruís con
+el mismo nombre, reusan la caché vieja. Por eso cada build usa un nombre ÚNICO
+(Bibata-Matugen-<epoch>) → carga fresco y se ve el color nuevo al instante. Un symlink
+estable `Bibata-Matugen` → versión actual mantiene válido el env XCURSOR_THEME de startup.
+
+Uso: cursor-matugen [--force]
+"""
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+import time
+import tomllib
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+HOME = Path.home()
+DOTFILES = Path(__file__).resolve().parent.parent
+SRC = DOTFILES / "config/cursors/bibata-matugen"
+SVG_DIR = SRC / "svg"
+TOML = SRC / "x.build.toml"
+
+THEME_BASE = "Bibata-Matugen"            # symlink estable (para el env de startup)
+ICONS_DIR = HOME / ".icons"
+BUILD = Path("/tmp/bibata-matugen-build")
+CACHE = HOME / ".cache/cursor-matugen.accent"
+NAMEFILE = HOME / ".cache/cursor-matugen.theme"   # nombre versionado actual
+
+BORDER = "#000000"   # #0000FF → borde oscuro
+DETAIL = "#FFFFFF"   # #FF0000 → detalle claro
+
+
+def read_accent():
+    f = HOME / ".cache/matugen/cursor-accent"
+    if f.exists() and f.read_text().strip():
+        return f.read_text().strip()
+    j = HOME / ".cache/ambxst/colors.json"          # fallback
+    if j.exists():
+        return json.loads(j.read_text()).get("primary", "").strip()
+    return ""
+
+
+def recolor(text, accent):
+    for ph, col in (("#00FF00", accent), ("#0000FF", BORDER), ("#FF0000", DETAIL)):
+        text = text.replace(ph, col).replace(ph.lower(), col)
+    return text
+
+
+def current_name():
+    if NAMEFILE.exists():
+        n = NAMEFILE.read_text().strip()
+        if n and (ICONS_DIR / n).exists():
+            return n
+    return None
+
+
+def main():
+    force = "--force" in sys.argv
+    accent = read_accent()
+    if not re.fullmatch(r"#[0-9A-Fa-f]{6}", accent or ""):
+        sys.exit(f"cursor-matugen: accent inválido: {accent!r}")
+
+    if not force and CACHE.exists() \
+            and CACHE.read_text().strip().lower() == accent.lower() and current_name():
+        _apply(current_name())          # re-aplicar por si un apply previo falló
+        print(f"cursor-matugen: sin cambios ({accent}), re-aplicado")
+        return
+
+    name = f"{THEME_BASE}-{int(time.time())}"   # nombre único → evita la caché de Hyprland
+
+    # 1. build dir limpio
+    if BUILD.exists():
+        shutil.rmtree(BUILD)
+    (BUILD / "bitmaps").mkdir(parents=True)
+    rsvg_svg = BUILD / "svg"
+    rsvg_svg.mkdir(parents=True)
+
+    # 2. recolorear todos los SVG (incl. frames de animados) preservando estructura
+    for svg in SVG_DIR.rglob("*.svg"):
+        out = rsvg_svg / svg.relative_to(SVG_DIR)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(recolor(svg.read_text(), accent))
+
+    # 3. render → bitmaps (256px; ctgen escala a x11_sizes). En paralelo: ~8x más rápido.
+    cfg = tomllib.loads(TOML.read_text())
+    tasks = []
+    for key, v in cfg["cursors"].items():
+        if key == "fallback_settings" or not isinstance(v, dict):
+            continue
+        png = v.get("png", "")
+        if png.endswith("-*.png"):                      # "animado" → 1 frame estático
+            # El spinner de "ocupado" sale poco y sus colores son fijos (no matugen),
+            # así que renderizamos sólo el primer frame → cursor estático, build más liviano.
+            base = png[:-6]
+            frames = sorted((rsvg_svg / base).glob("*.svg"))
+            if frames:
+                fr = frames[0]
+                tasks.append((fr, BUILD / "bitmaps" / f"{fr.stem}.png"))
+        else:                                           # estático
+            base = png[:-4]
+            svg = rsvg_svg / f"{base}.svg"
+            if svg.exists():
+                tasks.append((svg, BUILD / "bitmaps" / png))
+    with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as ex:
+        list(ex.map(lambda t: _render(*t), tasks))
+
+    # 4. empaquetar con ctgen (out_dir absoluto, nombre único)
+    toml_txt = re.sub(r"out_dir\s*=\s*'[^']*'", f"out_dir = '{BUILD / 'themes'}'", TOML.read_text())
+    (BUILD / "build.toml").write_text(toml_txt)
+    subprocess.run(
+        ["ctgen", str(BUILD / "build.toml"), "-p", "x11",
+         "-d", str(BUILD / "bitmaps"), "-n", name,
+         "-c", "Bibata Modern recoloreado con matugen"],
+        cwd=BUILD, check=True,
+    )
+    built = BUILD / "themes" / name
+    if not built.exists():
+        sys.exit("cursor-matugen: ctgen no produjo el theme")
+
+    # 5. instalar bajo el nombre versionado
+    ICONS_DIR.mkdir(parents=True, exist_ok=True)
+    dest = ICONS_DIR / name
+    if dest.exists():
+        shutil.rmtree(dest)
+    shutil.copytree(built, dest)
+
+    # symlink estable Bibata-Matugen → versión actual (para el env XCURSOR_THEME)
+    stable = ICONS_DIR / THEME_BASE
+    if stable.is_symlink():
+        stable.unlink()
+    elif stable.is_dir():
+        shutil.rmtree(stable)
+    elif stable.exists():
+        stable.unlink()
+    stable.symlink_to(name)
+
+    # ~/.icons/default → apps X legacy
+    default = ICONS_DIR / "default"
+    default.mkdir(parents=True, exist_ok=True)
+    (default / "index.theme").write_text(f"[Icon Theme]\nInherits={name}\n")
+
+    # limpiar versiones viejas (deja sólo la actual)
+    for old in ICONS_DIR.glob(f"{THEME_BASE}-*"):
+        if old.name != name and old.is_dir() and not old.is_symlink():
+            shutil.rmtree(old, ignore_errors=True)
+
+    # 6. persistir + aplicar
+    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    CACHE.write_text(accent)
+    NAMEFILE.write_text(name)
+    _apply(name)
+    print(f"cursor-matugen: {name} listo ({accent})")
+
+
+def _apply(name):
+    """Aplica el cursor en vivo. Deriva HYPRLAND_INSTANCE_SIGNATURE si el contexto
+    (post_hook de matugen) no lo heredó, para que hyprctl pueda conectar."""
+    size = os.environ.get("XCURSOR_SIZE", "24")
+    env = os.environ.copy()
+    if "HYPRLAND_INSTANCE_SIGNATURE" not in env:
+        hdir = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "hypr"
+        if hdir.is_dir():
+            insts = sorted(hdir.iterdir(), key=lambda p: p.stat().st_mtime)
+            if insts:
+                env["HYPRLAND_INSTANCE_SIGNATURE"] = insts[-1].name
+    subprocess.run(["hyprctl", "setcursor", name, size], env=env, check=False)
+    subprocess.run(["gsettings", "set", "org.gnome.desktop.interface",
+                    "cursor-theme", name], check=False)
+
+
+def _render(svg, out):
+    subprocess.run(["rsvg-convert", "-w", "256", "-h", "256", "-o", str(out), str(svg)], check=True)
+
+
+if __name__ == "__main__":
+    main()

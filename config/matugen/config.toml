@@ -1,6 +1,14 @@
 [config]
 version_check = false
 
+# === Cursor (accent para recolorear Bibata via bin/cursor-matugen) ===
+# post_hook corre en CUALQUIER run de matugen (Ambxst, bin/wall, color picker),
+# detached para no frenar el cambio de wallpaper.
+[templates.cursor-accent]
+input_path = '~/.config/matugen/templates/cursor/accent'
+output_path = '~/.cache/matugen/cursor-accent'
+post_hook = 'setsid -f $HOME/.local/bin/cursor-matugen >/dev/null 2>&1'
+
 # === Hyprland (formato .conf — usamos .conf, no .lua) ===
 [templates.hyprland]
 input_path = '~/.config/matugen/templates/hyprland/colors.conf'
