@@ -149,3 +149,21 @@ filechooser .dialog-action-area,
 filechooserwidget .dialog-action-area {
   background: transparent;
 }
+
+/* ========================================================================
+ * yad / GTK3 file chooser (Save as… del screenshot). El área de archivos
+ * usaba view_bg casi-negro opaco; la hacemos translúcida para que combine
+ * con la ventana (blurea al flotar) en vez de un bloque negro sólido.
+ * ======================================================================== */
+filechooser treeview.view,
+filechooserwidget treeview.view,
+filechooser .view,
+filechooserwidget .view {
+  background-color: alpha(@view_bg_color, 0.30);
+}
+filechooser treeview.view:selected,
+filechooserwidget treeview.view:selected,
+filechooser .view:selected,
+filechooserwidget .view:selected {
+  background-color: alpha(@accent_color, 0.30);
+}

@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Unified floating file/dir picker for Ambxst.
+#
+# Usage: ambxst-pick <dir|file|save> [start-path] [title]
+# Prints the chosen path to stdout (empty if cancelled).
+#
+# Why this exists:
+#   - One place defines the float behaviour, so callers never write
+#     `hyprctl dispatch exec [rules]` themselves (Hyprland 0.55.2 ignores
+#     normal windowrules — issue #12808 — so we apply rules at spawn-time).
+#   - Lets the user pick the backend (yad GUI dialog vs yazi TUI) via
+#     ~/.config/ambxst/filepicker ("yad" | "yazi"). Defaults to yad.
+#   - Blocks until the user chooses, then prints the path → callers (e.g. a
+#     Quickshell Process) capture it on stdout like any command.
+
+set -e
+
+MODE="${1:-file}"
+START="${2:-$HOME}"
+TITLE="${3:-Select}"
+
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/ambxst/filepicker"
+PICKER="yad"
+if [ -r "$CFG" ]; then
+    val="$(tr -d '[:space:]' < "$CFG" 2>/dev/null || true)"
+    [ "$val" = "yazi" ] && PICKER="yazi"
+fi
+
+WORK="$(mktemp -d /tmp/ambxst-pick.XXXXXX)"
+OUT="$WORK/out"
+DONE="$WORK/done"
+INNER="$WORK/inner.sh"
+: > "$OUT"
+
+cleanup() {
+    rm -rf "$WORK"
+    hyprctl dispatch closewindow class:ambxst-pick >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+trap 'exit 130' TERM INT
+
+if [ "$PICKER" = "yazi" ] && command -v yazi >/dev/null 2>&1; then
+    case "$MODE" in
+        dir) YZARGS=(--chooser-file="$OUT" --cwd-file="$OUT.cwd" "$START") ;;
+        *)   YZARGS=(--chooser-file="$OUT" "$START") ;;
+    esac
+    cat > "$INNER" <<EOF
+#!/usr/bin/env bash
+trap 'printf done > "$DONE"' EXIT
+yazi ${YZARGS[*]@Q}
+EOF
+    chmod +x "$INNER"
+    hyprctl dispatch exec \
+        "[float;size 1000 680;center;pin] kitty --class=ambxst-pick --title=Pick -- bash $INNER" >/dev/null
+else
+    # yad (default) — GTK dialog with editable filename for save mode
+    case "$MODE" in
+        dir)  YARGS=(--file --directory --filename="$START/") ;;
+        save) YARGS=(--file --save --confirm-overwrite --filename="$START") ;;
+        *)    YARGS=(--file --filename="$START") ;;
+    esac
+    cat > "$INNER" <<EOF
+#!/usr/bin/env bash
+trap 'printf done > "$DONE"' EXIT
+GTK_USE_PORTAL=0 yad --title="$TITLE" --width=950 --height=620 ${YARGS[*]@Q} > "$OUT" 2>/dev/null
+EOF
+    chmod +x "$INNER"
+    hyprctl dispatch exec \
+        "[float;size 950 620;center;pin] bash $INNER" >/dev/null
+fi
+
+# Wait for the picker to finish (marker written by the inner trap).
+while [ ! -e "$DONE" ]; do
+    sleep 0.1
+done
+
+RESULT="$(head -n1 "$OUT" 2>/dev/null || true)"
+if [ "$PICKER" = "yazi" ] && [ "$MODE" = "dir" ] && [ -z "$RESULT" ] && [ -s "$OUT.cwd" ]; then
+    RESULT="$(head -n1 "$OUT.cwd" 2>/dev/null || true)"
+fi
+RESULT="${RESULT%|}"   # strip yad's trailing field separator
+printf '%s' "$RESULT"
