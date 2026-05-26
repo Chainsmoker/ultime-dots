@@ -47,7 +47,17 @@ reveal = [
 #   ya pkg add yazi-rs/plugins:rich-preview
 
 [plugin]
+# Match office docs by file extension first (Yazi 26.x rules use `url`, a glob on the
+# file path). Yazi frequently detects OOXML files (especially .pptx) as
+# `application/zip`, so the mime rules below miss them and the file falls through to
+# the archive previewer (shows a folder structure). The `url` rules are prepended, so
+# they win over the preset's `application/{zip,...}` archive previewer.
 prepend_preloaders = [
+    { url = "*.{doc,docx,dot,dotx,docm}", run = "office" },
+    { url = "*.{xls,xlsx,xlt,xltx,xlsm}", run = "office" },
+    { url = "*.{ppt,pptx,pps,ppsx,pot,potx,pptm}", run = "office" },
+    { url = "*.{odt,ods,odp,odg,odf,fodt,fods,fodp}", run = "office" },
+    { url = "*.rtf", run = "office" },
     { mime = "application/openxmlformats-officedocument.*", run = "office" },
     { mime = "application/oasis.opendocument.*", run = "office" },
     { mime = "application/ms-*", run = "office" },
@@ -55,6 +65,11 @@ prepend_preloaders = [
 ]
 
 prepend_previewers = [
+    { url = "*.{doc,docx,dot,dotx,docm}", run = "office" },
+    { url = "*.{xls,xlsx,xlt,xltx,xlsm}", run = "office" },
+    { url = "*.{ppt,pptx,pps,ppsx,pot,potx,pptm}", run = "office" },
+    { url = "*.{odt,ods,odp,odg,odf,fodt,fods,fodp}", run = "office" },
+    { url = "*.rtf", run = "office" },
     { mime = "application/openxmlformats-officedocument.*", run = "office" },
     { mime = "application/oasis.opendocument.*", run = "office" },
     { mime = "application/ms-*", run = "office" },
