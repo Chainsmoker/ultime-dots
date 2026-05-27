@@ -1,15 +1,14 @@
 # GENERADO POR MATUGEN — no editar a mano (se regenera con `wall`).
 # Editá el template: ~/.config/matugen/templates/starship/starship.toml
 #
-# Tema de "pills" powerline (el de antes) en UNA sola línea, recoloreado con la
-# paleta del wallpaper vía matugen. La pill del directorio usa el accent (primary)
-# para que resalte; cmd_duration va en surface (sutil) y git en secondary.
+# Tema "pills" powerline (el de antes) en UNA sola línea, recoloreado con la
+# paleta del wallpaper. Los glifos nerd/powerline se inyectan desde el generador
+# (bin) como escapes \u porque la PUA se corrompe al editar el archivo a mano.
 
 add_newline = false
 palette = "matugen"
-# Todo en una línea: duración · directorio · branch · status git · caret.
-# OJO: el `format` de raíz DEBE ir antes de cualquier [tabla]; si va después de
-# [palettes.matugen] se parsea como palettes.matugen.format y starship usa el default.
+# El `format` de raíz DEBE ir antes de cualquier [tabla]; si va después de
+# [palettes.matugen], TOML lo mete en esa tabla y starship usa su layout default.
 format = "$cmd_duration $directory$git_branch$git_status $character"
 
 [palettes.matugen]
@@ -26,33 +25,24 @@ char_err = "{{colors.error.default.hex}}"
 
 [cmd_duration]
 min_time = 0
-format = '[](fg:cmd_bg)[󰪢 $duration](bg:cmd_bg fg:cmd_fg bold)[](fg:cmd_bg)'
+format = '[](fg:cmd_bg)[󰪢 $duration](bg:cmd_bg fg:cmd_fg bold)[](fg:cmd_bg)'
 
 [directory]
-home_symbol = " "
-read_only = "  "
-read_only_style = "bg:char_err fg:dir_fg"
+home_symbol = "󰑭 "
+read_only = " 󰑖"
+read_only_style = "bg:char_err fg:dir_fg bold"
 truncation_length = 2
 truncation_symbol = ".../"
-format = '[](fg:dir_bg)[󰉋 → $path](bg:dir_bg fg:dir_fg bold)[](fg:dir_bg)'
-
-[directory.substitutions]
-"Desktop" = "  "
-"Documents" = "  "
-"Downloads" = "  "
-"Music" = " 󰎈 "
-"Pictures" = "  "
-"Videos" = "  "
-"GitHub" = " 󰊤 "
+format = '[](fg:dir_bg)[󰉋 → $path](bg:dir_bg fg:dir_fg bold)[](fg:dir_bg)'
 
 [git_branch]
 symbol = "󰘬"
 truncation_length = 12
 truncation_symbol = "…"
-format = ' 󰜥 [](fg:git_bg)[$symbol $branch(:$remote_branch)](fg:git_fg bg:git_bg bold)[](fg:git_bg)'
+format = ' 󰜥 [](fg:git_bg)[$symbol $branch(:$remote_branch)](fg:git_fg bg:git_bg bold)[](fg:git_bg)'
 
 [git_status]
-format = '( [](fg:stat_bg)[$all_status$ahead_behind](bg:stat_bg fg:stat_fg bold)[](fg:stat_bg))'
+format = '( [](fg:stat_bg)[$all_status$ahead_behind](bg:stat_bg fg:stat_fg bold)[](fg:stat_bg))'
 conflicted = "✕"
 ahead = "↑${count}"
 behind = "↓${count}"
@@ -66,8 +56,8 @@ renamed = "»${count}"
 deleted = "✘${count}"
 
 [character]
-success_symbol = "[ ](bold fg:char_ok)"
-error_symbol = "[ ](bold fg:char_err)"
+success_symbol = "[❯](bold fg:char_ok)"
+error_symbol = "[❯](bold fg:char_err)"
 
 [package]
 disabled = true
