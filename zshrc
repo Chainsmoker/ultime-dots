@@ -3,8 +3,9 @@
 # Ruta a tu instalación de Oh My Zsh
 export ZSH="$HOME/.oh-my-zsh"
 
-# Tema y plugins de Oh My Zsh
-ZSH_THEME="archcraft"
+# Prompt: si starship está instalado lo usamos (ver init más abajo) y dejamos
+# que omz NO pinte su propio prompt; si no, cae al tema archcraft (portable).
+if command -v starship >/dev/null; then ZSH_THEME=""; else ZSH_THEME="archcraft"; fi
 plugins=(git sudo)
 
 # Carpeta Oh My Zsh Custom (se linkea automáticamente a config/zsh-custom)
@@ -15,7 +16,11 @@ if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
     source "$ZSH/oh-my-zsh.sh"
 fi
 
+# Prompt starship (después de omz para que gane). Lee ~/.config/starship.toml.
+command -v starship >/dev/null && eval "$(starship init zsh)"
+
 # Exportar PATH y Editor por defecto
+typeset -U path PATH          # dedup automático de entradas repetidas en PATH
 export PATH="$HOME/.local/bin:$PATH"
 
 # Aliases

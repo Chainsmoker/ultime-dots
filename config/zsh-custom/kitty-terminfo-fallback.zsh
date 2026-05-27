@@ -5,6 +5,10 @@ if [[ "$TERM" == "xterm-kitty" ]] && ! infocmp xterm-kitty &>/dev/null; then
     export TERM=xterm-256color
 fi
 
-# Bonus: si SSHeás a remotos, exportar TERM=xterm-256color para esa sesión.
-# Esto evita el problema sin cambiar tu TERM local.
-alias ssh='TERM=xterm-256color ssh'
+# Para SSH a remotos sin kitty-terminfo: usar `kitten ssh` (copia el terminfo de
+# kitty al host automáticamente y conserva colores/teclas en terminales capaces).
+# Cae a `ssh` normal fuera de kitty. Mejor que forzar TERM=xterm-256color en TODO
+# host, que degradaba la sesión incluso en remotos que sí soportan kitty.
+if [[ -n "${KITTY_WINDOW_ID:-}" ]] && command -v kitten >/dev/null 2>&1; then
+    alias ssh='kitten ssh'
+fi

@@ -14,6 +14,9 @@
 
 set -e
 
+# $1 = multiple (selección múltiple). No soportado aún, pero lo nombramos para
+# documentar el orden de args del portal y no desfasar los siguientes.
+# shellcheck disable=SC2034
 MULTIPLE="${1:-0}"
 DIRECTORY="${2:-0}"
 SAVE="${3:-0}"
@@ -39,7 +42,7 @@ trap 'exit 130' TERM INT
 
 # Construir args de yazi según el modo
 case "$SAVE$DIRECTORY" in
-    1*) YAZI_ARGS=(--chooser-file="$OUT" "$TARGET_PATH") ;;
+    1*) YAZI_ARGS=(--chooser-file="$OUT" --cwd-file="${OUT}.dir" "$TARGET_PATH") ;;
     *1) YAZI_ARGS=(--chooser-file="$OUT" --cwd-file="${OUT}.1" "$TARGET_PATH") ;;
     *)  YAZI_ARGS=(--chooser-file="$OUT" "$TARGET_PATH") ;;
 esac
@@ -65,15 +68,29 @@ chmod +x "$INNER"
 # considere "current" al momento del exec, que no necesariamente es la del
 # user (la app llamadora puede estar en otra). Pin = visible en TODAS las
 # workspaces → el user siempre la ve.
-hyprctl dispatch exec \
+# hyprctl SIEMPRE sale con código 0, pero imprime "ok" solo si Hyprland aceptó
+# el dispatch. Si no (Hyprland caído, dispatcher inválido) no se spawnea nada y
+# el marker no llegaría nunca → abortamos limpio en vez de pollear para siempre.
+if ! hyprctl dispatch exec \
 "[float;size 1000 680;center;opacity 0.92 0.88;pin] \
 kitty --class=termfilechooser-portal --title=Pick \
 --override window_padding_width=8 \
--- $INNER ${YAZI_ARGS[*]@Q}" > /dev/null
+-- $INNER ${YAZI_ARGS[*]@Q}" 2>/dev/null | grep -q '^ok'; then
+    : > "$OUT"
+    exit 0
+fi
 
-# Esperar a que yazi termine (poll del marker)
+# Esperar a que yazi termine (poll del marker). Respaldo anti-cuelgue: tras ~3s
+# de gracia, si la ventana del picker ya no existe pero el marker no llegó
+# (kitty murió antes de instalar el trap), salimos igual.
+waited=0
 while [[ ! -f "$DONE" ]]; do
-    sleep 0.1
+    sleep 0.2
+    waited=$((waited + 1))
+    if (( waited >= 15 && waited % 5 == 0 )) && \
+       ! hyprctl clients -j 2>/dev/null | grep -q termfilechooser-portal; then
+        break
+    fi
 done
 
 YAZI_EXIT="$(cat "$EXIT_CODE" 2>/dev/null || echo 1)"
@@ -83,7 +100,26 @@ YAZI_EXIT="$(cat "$EXIT_CODE" 2>/dev/null || echo 1)"
 if [[ "$YAZI_EXIT" != "0" ]]; then
     : > "$OUT"
     [[ "$DIRECTORY" == "1" ]] && rm -f "${OUT}.1"
+    [[ "$SAVE" == "1" ]] && rm -f "${OUT}.dir"
     exit 0
+fi
+
+# Save mode: yazi es un file manager, no un diálogo de "guardar como". Si el
+# user navega y confirma, chooser-file puede traer una CARPETA (o quedar vacío
+# si salió con `q`). Chromium/Brave necesita una RUTA DE ARCHIVO completa: si le
+# pasamos un directorio, la descarga falla con FILE_FAILED ("se produjo un
+# error"). Así que cuando lo devuelto no es un archivo, le pegamos el nombre
+# sugerido a la carpeta elegida (o al cwd donde quedó yazi).
+if [[ "$SAVE" == "1" ]]; then
+    base="$(basename -- "$TARGET_PATH")"
+    sel="$(cat "$OUT" 2>/dev/null || true)"
+    if [[ -z "$sel" || -d "$sel" ]]; then
+        dir="$sel"
+        [[ -z "$dir" || ! -d "$dir" ]] && dir="$(cat "${OUT}.dir" 2>/dev/null || true)"
+        [[ -z "$dir" || ! -d "$dir" ]] && dir="$(dirname -- "$TARGET_PATH")"
+        printf '%s/%s\n' "${dir%/}" "$base" > "$OUT"
+    fi
+    rm -f "${OUT}.dir"
 fi
 
 # Directory mode: si yazi no escribió a $OUT pero sí a ${OUT}.1 (cwd-file

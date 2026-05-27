@@ -39,8 +39,10 @@ DETAIL = "#FFFFFF"   # #FF0000 → detalle claro
 
 def read_accent():
     f = HOME / ".cache/matugen/cursor-accent"
-    if f.exists() and f.read_text().strip():
-        return f.read_text().strip()
+    if f.exists():
+        accent = f.read_text().strip()
+        if accent:
+            return accent
     j = HOME / ".cache/ambxst/colors.json"          # fallback
     if j.exists():
         return json.loads(j.read_text()).get("primary", "").strip()
@@ -89,7 +91,8 @@ def main():
         out.write_text(recolor(svg.read_text(), accent))
 
     # 3. render → bitmaps (256px; ctgen escala a x11_sizes). En paralelo: ~8x más rápido.
-    cfg = tomllib.loads(TOML.read_text())
+    toml_raw = TOML.read_text()
+    cfg = tomllib.loads(toml_raw)
     tasks = []
     for key, v in cfg["cursors"].items():
         if key == "fallback_settings" or not isinstance(v, dict):
@@ -112,7 +115,7 @@ def main():
         list(ex.map(lambda t: _render(*t), tasks))
 
     # 4. empaquetar con ctgen (out_dir absoluto, nombre único)
-    toml_txt = re.sub(r"out_dir\s*=\s*'[^']*'", f"out_dir = '{BUILD / 'themes'}'", TOML.read_text())
+    toml_txt = re.sub(r"out_dir\s*=\s*'[^']*'", f"out_dir = '{BUILD / 'themes'}'", toml_raw)
     (BUILD / "build.toml").write_text(toml_txt)
     subprocess.run(
         ["ctgen", str(BUILD / "build.toml"), "-p", "x11",

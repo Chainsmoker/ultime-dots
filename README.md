@@ -8,15 +8,14 @@ Configs portadas / inspiradas en [end-4/dots-hyprland](https://github.com/end-4/
 | Carpeta / archivo | Origen | Notas |
 |---|---|---|
 | `config/hypr/` | end-4 (adaptado) | Hyprland config. Animaciones, blur, gestures de end-4. Keybinds genéricos. Autostart de Ambxst. |
-| `config/kitty/` | end-4 | Terminal. **Comentado** el include de theme generado por illogical-impulse. |
-| `config/fuzzel/` | end-4 | Launcher fallback. Theme con colores hardcodeados. |
+| `config/kitty/` | end-4 | Terminal. Theme dinámico vía matugen (`include ./colors.conf`). |
+| `config/fuzzel/` | end-4 | Launcher fallback. Theme dinámico generado por matugen (`fuzzel_theme.ini`, gitignored). |
 | `config/foot/` | end-4 | Terminal alternativo. |
 | `config/mpv/` | end-4 | Video player. |
-| `config/wlogout/` | end-4 | Menú de salida (lock/logout/reboot/shutdown). |
 | `config/fontconfig/` | end-4 | Sustitución de fuentes. |
 | `config/xdg-desktop-portal/` | end-4 | Portal Hyprland para screen share / file pickers. |
 | `config/zshrc.d/` | end-4 | Snippets de zsh. `auto-Hypr.sh` fixed para usar `Hyprland` real (no `start-hyprland`). |
-| `config/starship.toml` | end-4 | Prompt para starship. |
+| `config/matugen/templates/starship/` | propio | Prompt de zsh (starship): brutalista, bloques sólidos, recoloreado por matugen. Se genera a `~/.config/starship.toml`. |
 | `config/{chrome,code,thorium}-flags.conf` | end-4 | Flags para Wayland nativo. |
 
 ## Theming dinámico (matugen)
@@ -28,6 +27,9 @@ Configs portadas / inspiradas en [end-4/dots-hyprland](https://github.com/end-4/
 - `fuzzel/fuzzel_theme.ini` → tema dinámico del launcher
 - `gtk-3.0/gtk.css` + `gtk-4.0/gtk.css` → Firefox/Brave/Nautilus
 - `hyprland/hyprlock-colors.conf` → pantalla de bloqueo
+- `starship/starship.toml` → `~/.config/starship.toml` (prompt de zsh, brutalista)
+
+> Los outputs generados (`fuzzel_theme.ini`, `colors.conf`, `starship.toml`, …) están **gitignored**: versionamos los templates, no la salida. Por eso no hay commits de "regenerate colors".
 
 Cambiar wallpaper + regenerar paleta:
 
@@ -43,18 +45,26 @@ wall ~/Pictures/algo.jpg light    # modo light
 | | Motivo |
 |---|---|
 | `quickshell/` | end-4 shell illogical-impulse — reemplazado por Ambxst. |
-| `Kvantum/`, `kde-material-you-colors/`, `kdeglobals`, `konsolerc`, `dolphinrc`, `darklyrc` | Para apps Qt/KDE. Stack adicional, lo armamos cuando hagan falta. |
+| `kde-material-you-colors/`, `kdeglobals`, `konsolerc`, `dolphinrc`, `darklyrc` | Para apps Qt/KDE. Stack adicional, lo armamos cuando hagan falta. |
 | `fish/` | Uso zsh. |
 
 ## Instalación en máquina nueva
 
+Dos pasos (Arch Linux):
+
 ```bash
 git clone https://github.com/<vos>/dotfiles.git ~/dotfiles
 cd ~/dotfiles
+
+# 1) Apps + Ambxst + matugen + fuentes (paquete grande).
+#    Agregá --with-hyprland si Hyprland todavía no está instalado.
+bash install-ambxst.sh            # o: bash install-ambxst.sh --with-hyprland
+
+# 2) Symlinkear los dotfiles + deps del file-picker + generar temas iniciales
 ./install.sh
 ```
 
-`install.sh` symlinkea `~/dotfiles/config/*` a `~/.config/*`. Backupea cualquier archivo existente como `*.dotfiles-bak` antes de pisar.
+`install.sh` symlinkea `~/dotfiles/config/*` a `~/.config/*` (backupea lo existente como `*.bak-<timestamp>`), instala las deps del portal/picker y corre un `matugen` inicial para que los temas existan en el primer arranque. Cambiá la paleta cuando quieras con `wall <imagen>`.
 
 ## Edición
 
@@ -89,5 +99,4 @@ git push
 ## TODO
 
 - [ ] Restaurar `windowrule`s cuando descubra la sintaxis para Hyprland 0.55+.
-- [ ] Theming de kitty: portar o configurar matugen, o hardcodear paleta.
 - [ ] Workspaces / multi-monitor config si lo amerita.

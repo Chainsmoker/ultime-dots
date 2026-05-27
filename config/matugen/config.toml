@@ -47,6 +47,12 @@ output_path = '~/.cache/matugen/fzf-colors.zsh'
 input_path = '~/.config/matugen/templates/helix/theme.toml'
 output_path = '~/.config/helix/themes/matugen.toml'
 
+# Prompt de zsh (starship). starship no soporta `include`, así que generamos el
+# starship.toml entero desde el template → el prompt se recolorea con el wallpaper.
+[templates.starship]
+input_path = '~/.config/matugen/templates/starship/starship.toml'
+output_path = '~/.config/starship.toml'
+
 # Satty (anotador de capturas). Satty hardcodea sus barras a negro y NO usa el
 # tema GTK; sí lee ~/.config/satty/overrides.css, que reescribimos aquí.
 [templates.satty]

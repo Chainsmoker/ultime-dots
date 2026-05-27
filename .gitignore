@@ -7,3 +7,16 @@
 # Outputs/cache locales
 cache/
 state/
+
+# Outputs de matugen: se regeneran desde el wallpaper en cada `wall`.
+# Versionamos los TEMPLATES (config/matugen/templates/), no la salida — así no
+# hay churn de "regenerate colors" en cada cambio de wallpaper.
+config/fuzzel/fuzzel_theme.ini
+config/hypr/colors.conf
+config/hypr/hyprlock/colors.conf
+config/kitty/colors.conf
+config/gtk-3.0/gtk.css
+config/gtk-4.0/gtk.css
+config/yazi/theme.toml
+config/helix/themes/matugen.toml
+config/satty/overrides.css

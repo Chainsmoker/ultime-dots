@@ -1,0 +1,73 @@
+# GENERADO POR MATUGEN — no editar a mano (se regenera con `wall`).
+# Editá el template: ~/.config/matugen/templates/starship/starship.toml
+#
+# Prompt brutalista: bloques sólidos de color pegados (transiciones duras),
+# alto contraste, números en mono, sin íconos cute. La paleta sale del wallpaper.
+
+add_newline = false
+palette = "matugen"
+
+[palettes.matugen]
+bg       = "{{colors.background.default.hex}}"
+fg       = "{{colors.on_background.default.hex}}"
+surface  = "{{colors.surface_container_high.default.hex}}"
+on_surf  = "{{colors.on_surface.default.hex}}"
+primary  = "{{colors.primary.default.hex}}"
+on_prim  = "{{colors.on_primary.default.hex}}"
+second   = "{{colors.secondary.default.hex}}"
+on_sec   = "{{colors.on_secondary.default.hex}}"
+tertiary = "{{colors.tertiary.default.hex}}"
+on_tert  = "{{colors.on_tertiary.default.hex}}"
+error    = "{{colors.error.default.hex}}"
+on_error = "{{colors.on_error.default.hex}}"
+dim      = "{{colors.outline.default.hex}}"
+
+# Bloques pegados (sin espacios entre módulos) → banda de color con cortes duros.
+format = """
+$directory$git_branch$git_status$cmd_duration
+$character"""
+
+[directory]
+format = "[ $path ]($style)"
+style = "bg:primary fg:on_prim bold"
+truncation_length = 3
+truncation_symbol = "…/"
+home_symbol = "~"
+read_only = " RO"
+read_only_style = "bg:error fg:on_error bold"
+use_os_path_sep = true
+
+[git_branch]
+symbol = "⎇ "
+format = "[ $symbol$branch ]($style)"
+style = "bg:tertiary fg:on_tert bold"
+truncation_length = 18
+truncation_symbol = "…"
+
+[git_status]
+format = "([ $all_status$ahead_behind ]($style))"
+style = "bg:second fg:on_sec bold"
+conflicted = "✕"
+ahead = "↑${count}"
+behind = "↓${count}"
+diverged = "↕${ahead_count}/${behind_count}"
+up_to_date = ""
+untracked = "?${count}"
+stashed = "≡${count}"
+modified = "•${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+[cmd_duration]
+min_time = 500
+format = "[ $duration ]($style)"
+style = "bg:surface fg:on_surf bold"
+
+[character]
+success_symbol = "[█▓▒](bold fg:primary)"
+error_symbol = "[█▓▒](bold fg:error)"
+vimcmd_symbol = "[█▓▒](bold fg:tertiary)"
+
+[package]
+disabled = true

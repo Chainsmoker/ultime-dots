@@ -42,12 +42,16 @@ if sudo -n papirus-folders -C "$COLOR" >/dev/null 2>&1; then
     echo "$COLOR" > "$CACHE"
 
     # Invalidar cache de iconos GTK para que Nautilus tome los nuevos symlinks
-    # sin restart. Hack standard: toggle icon-theme.
-    gsettings set org.gnome.desktop.interface icon-theme '' 2>/dev/null
-    gsettings set org.gnome.desktop.interface icon-theme 'Papirus-Dark' 2>/dev/null
+    # sin restart. Hack standard: toggle icon-theme. Leemos el tema ACTUAL en vez
+    # de hardcodear Papirus-Dark, así respeta el modo light (Papirus-Light) o
+    # cualquier otro tema que el usuario tenga puesto.
+    ICON_THEME=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'\"" || true)
+    [[ -z "$ICON_THEME" ]] && ICON_THEME="Papirus-Dark"
+    gsettings set org.gnome.desktop.interface icon-theme '' 2>/dev/null || true
+    gsettings set org.gnome.desktop.interface icon-theme "$ICON_THEME" 2>/dev/null || true
 
     # Refresh cache binario para apps que lo leen (Brave, Electron, etc.)
-    gtk-update-icon-cache -tf /usr/share/icons/Papirus-Dark 2>/dev/null || true
+    gtk-update-icon-cache -tf "/usr/share/icons/$ICON_THEME" 2>/dev/null || true
 else
     echo "folders: 'sudo -n papirus-folders -C $COLOR' falló. ¿Configuraste sudoers?" >&2
     echo "       echo \"\$USER ALL=(ALL) NOPASSWD: /usr/bin/papirus-folders\" | sudo tee /etc/sudoers.d/papirus-folders" >&2

@@ -127,10 +127,21 @@ PKGS=(
     adw-gtk-theme matugen gpu-screen-recorder wl-clip-persist mpvpaper gradia
     # Go: para compilar axctl desde el fork con el fix de Hyprland 0.55+
     go
+    # Tools de los dotfiles: prompt (zshrc), editor ($EDITOR=hx), screenshot annotator
+    starship helix satty
     # Icons + folder color dinámico (apply-folder-color)
     papirus-icon-theme papirus-folders-git
 )
 $AUR -S --needed --noconfirm "${PKGS[@]}"
+
+# clickgen provee `ctgen`, que bin/cursor-matugen usa para construir el cursor
+# Bibata recoloreado con matugen. No está en repos/AUR de forma confiable → pipx.
+if ! has ctgen; then
+    info "Instalando clickgen (ctgen) con pipx..."
+    pipx install clickgen >/dev/null 2>&1 \
+        || warn "pipx install clickgen falló — el cursor dinámico no se construirá hasta instalarlo."
+    pipx ensurepath >/dev/null 2>&1 || true
+fi
 
 # === 4b. Hyprland (opcional, con --with-hyprland) ===
 if [[ $WITH_HYPRLAND -eq 1 ]]; then
@@ -139,10 +150,9 @@ if [[ $WITH_HYPRLAND -eq 1 ]]; then
         hyprland
         xdg-desktop-portal-hyprland   # screen share, file pickers
         xdg-desktop-portal-gtk        # fallback portal (file pickers GTK)
-        polkit-kde-agent              # diálogos de autenticación gráficos
+        xfce-polkit                   # agente de autenticación (lo lanza hyprland.conf)
         qt5-wayland qt6-wayland       # apps Qt en Wayland
         xorg-xwayland                 # apps X11 dentro de Hyprland
-        hyprpolkitagent               # alternativa de polkit (opcional)
     )
     $AUR -S --needed --noconfirm "${HYPR_PKGS[@]}" || warn "Algún paquete de Hyprland falló — revisá arriba."
     ok "Hyprland instalado. Reiniciá tu display manager (sddm/gdm/lightdm) para que aparezca en el selector de sesión."

@@ -11,8 +11,8 @@ Scripts que viven en `~/.local/bin/` (linkeados por `install.sh`). Son los **peg
 | `wall` | Setea wallpaper + regenera paleta + recarga apps (+ bridge KDE/Qt vía kde-material-you-colors) |
 | `apply-folder-color` | Mapea accent matugen → preset color de Papirus folders |
 | `yazi-portal-wrapper` | Wrapper de xdg-desktop-portal-termfilechooser. Lanza kitty + yazi flotante (vía `hyprctl dispatch exec [rules]`) cuando una app pide File Picker. |
-| `term-art` | Arte random anime/pokemon al abrir terminal. Usa `kitty +kitten icat` + cache en `~/.cache/term-art/`. Llamado desde `~/.oh-my-zsh/custom/term-art.zsh` al iniciar shell. |
-| `term-fetch` | Similar pero agrega info del sistema con neofetch debajo de la imagen. Reemplazó a `term-art` como default en startup. |
+| `term-art` | Arte random de Pokémon al abrir terminal. Usa `kitty +kitten icat` + cache en `~/.cache/term-art/`. Solo corre dentro de kitty. |
+| `term-fetch` | Wrapper fino de `term-art` (`exec term-art "$@"`). Es lo que `config/zsh-custom/term-art.zsh` llama en el startup del shell. Punto de extensión si algún día se agrega neofetch debajo de la imagen. |
 
 ## WHERE TO LOOK
 
@@ -27,7 +27,7 @@ Scripts que viven en `~/.local/bin/` (linkeados por `install.sh`). Son los **peg
 | Bridge matugen → KDE/Qt | `wall:24-34` | Lee `~/.cache/matugen/source-color.txt` y llama `kde-material-you-colors` |
 | File Picker (yazi vía portal) | `yazi-portal-wrapper` | Usa `hyprctl dispatch exec [float;size;pin]` para spawn-time rules (workaround Hyprland #12808). Marker file con `trap EXIT` para cleanup robusto. |
 | Class del picker window | `yazi-portal-wrapper:40` | `--class=termfilechooser-portal` (no hace falta windowrule en hyprland.conf, va inline) |
-| Anime/Pokemon art en terminal | `term-art:1-95` | Cache en `~/.cache/term-art/`, sources: PokeAPI sprites + nekos.best API. Dimensiones configurables vía `TERM_ART_WIDTH`/`TERM_ART_HEIGHT`. |
+| Pokémon art en terminal | `term-art` | Cache en `~/.cache/term-art/`, source: PokeAPI official artwork (GitHub CDN, gens 1-9). Dimensiones configurables vía `TERM_ART_WIDTH`/`TERM_ART_HEIGHT`. |
 
 ## CONVENTIONS
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Crea symlinks de ~/dotfiles/config/* hacia ~/.config/*
-# Backupea cualquier archivo existente como *.dotfiles-bak antes de pisar.
+# Backupea cualquier archivo existente como *.bak-<timestamp> antes de pisar.
 
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -103,7 +103,7 @@ SYSTEMD_SRC="$SRC/systemd"
 SYSTEMD_DST="$DST/systemd"
 if [[ -d "$SYSTEMD_SRC" ]]; then
     while IFS= read -r -d '' file; do
-        rel="${file#$SYSTEMD_SRC/}"
+        rel="${file#"$SYSTEMD_SRC"/}"
         link="$SYSTEMD_DST/$rel"
         mkdir -p "$(dirname "$link")"
         if [[ -e "$link" && ! -L "$link" ]]; then
@@ -196,6 +196,24 @@ else
             ok "AUR: instalados ${missing_aur[*]}"
         fi
     fi
+fi
+
+# === Bootstrap matugen ===
+# fuzzel.ini, kitty.conf y hyprland.conf hacen include/source de archivos que
+# genera matugen (fuzzel_theme.ini, kitty/colors.conf, hypr/colors.conf, ...).
+# En un clone fresco no existen hasta el primer `wall`, así que los generamos ya
+# con un color por defecto para que nada falte en el primer arranque.
+if command -v matugen >/dev/null; then
+    if [[ ! -f "$HOME/.config/hypr/colors.conf" ]]; then
+        info "Generando temas iniciales con matugen (color por defecto)..."
+        if matugen color hex "#6750a4" --mode dark >/dev/null 2>&1; then
+            ok "Temas matugen generados — cambialos cuando quieras con: wall <imagen>"
+        else
+            warn "matugen falló — corré 'wall <imagen>' a mano para generar los temas."
+        fi
+    fi
+else
+    warn "matugen no instalado: corré install-ambxst.sh primero, después 'wall <imagen>'."
 fi
 
 echo

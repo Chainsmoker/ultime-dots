@@ -19,24 +19,28 @@ mkdir -p "$CACHE_DIR"
 
 _populate_cache() {
     echo "  Populating art cache..." >&2
-    local count=0
 
+    # -f: en un 404/error HTTP, curl falla y NO escribe el archivo (sin -f
+    # quedaba un PNG basura con el HTML de error que icat intentaba mostrar).
     for i in $(shuf -i 1-"$POKEMON_COUNT" -n 35); do
-        curl -sSL --max-time 10 \
+        curl -fsSL --max-time 10 \
             -o "${CACHE_DIR}/pokemon-${i}.png" \
             "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${i}.png" \
             &>/dev/null &
-        count=$((count + 1))
     done
 
     wait || true
-    echo "  Cached ${count} images" >&2
+    # Contar lo realmente descargado (no los intentos lanzados).
+    shopt -s nullglob
+    local got=( "${CACHE_DIR}"/*.png )
+    shopt -u nullglob
+    echo "  Cached ${#got[@]} images" >&2
 }
 
 _refresh_one() {
     (
         local pid=$((RANDOM % POKEMON_COUNT + 1))
-        curl -sSL --max-time 10 \
+        curl -fsSL --max-time 10 \
             -o "${CACHE_DIR}/pokemon-${pid}.png" \
             "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pid}.png" \
             &>/dev/null || true
