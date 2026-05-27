@@ -50,10 +50,22 @@ wall ~/Pictures/algo.jpg light    # modo light
 
 ## Instalación en máquina nueva
 
-Dos pasos (Arch Linux):
+> ℹ️ El repo queda **clonado en la máquina**: los archivos de `~/.config` son
+> symlinks que apuntan adentro del repo, así que no lo borres después. El
+> one-liner igual lo clona por vos — no hace falta clonar a mano.
+
+**Un solo comando** (Arch Linux — clona + instala todo):
 
 ```bash
-git clone https://github.com/<vos>/dotfiles.git ~/dotfiles
+curl -fsSL https://raw.githubusercontent.com/Chainsmoker/ultime-dots/main/bootstrap.sh | bash
+# con Hyprland incluido:
+curl -fsSL https://raw.githubusercontent.com/Chainsmoker/ultime-dots/main/bootstrap.sh | bash -s -- --with-hyprland
+```
+
+**O a mano**, dos pasos:
+
+```bash
+git clone https://github.com/Chainsmoker/ultime-dots.git ~/dotfiles
 cd ~/dotfiles
 
 # 1) Apps + Ambxst + matugen + fuentes (paquete grande).
