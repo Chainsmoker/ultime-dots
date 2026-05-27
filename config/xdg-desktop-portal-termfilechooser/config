@@ -2,7 +2,7 @@
 # Wrapper custom (bin/yazi-portal-wrapper) que usa `hyprctl dispatch exec
 # [float;size...;center;opacity]` para que kitty abra directo flotante en
 # posición — sin flicker. Además limpia chooser-file en cancel/SIGTERM.
-cmd=/home/calvin/.local/bin/yazi-portal-wrapper
+cmd=$HOME/.local/bin/yazi-portal-wrapper
 
 default_dir=$HOME
 
