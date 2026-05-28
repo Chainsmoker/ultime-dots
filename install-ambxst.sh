@@ -110,6 +110,8 @@ PKGS=(
     quickshell qt6-base qt6-declarative qt6-wayland qt6-svg qt6-tools
     qt6-imageformats qt6-multimedia qt6-shadertools libwebp libavif
     syntax-highlighting breeze-icons hicolor-icon-theme
+    # Shell: zsh + tools que usan los aliases/fzf del zshrc (ls=eza, cat=bat, Ctrl-T/R=fzf/fd)
+    zsh bat eza fzf fd
     # Apps / utils
     kitty tmux fuzzel network-manager-applet blueman
     pipewire wireplumber pavucontrol easyeffects ffmpeg x264 playerctl
@@ -141,6 +143,33 @@ if ! has ctgen; then
     pipx install clickgen >/dev/null 2>&1 \
         || warn "pipx install clickgen falló — el cursor dinámico no se construirá hasta instalarlo."
     pipx ensurepath >/dev/null 2>&1 || true
+fi
+
+# === 4c. Herramientas CLI extra ===
+# Tools personales que querés en cada máquina nueva:
+#   gopass, lazydocker → repos oficiales; freeze, gowall → AUR.
+#   $AUR (yay/paru) instala ambos orígenes, así que van todos juntos.
+EXTRA_PKGS=(gopass freeze gowall lazydocker)
+info "Instalando tools extra: ${EXTRA_PKGS[*]}"
+$AUR -S --needed --noconfirm "${EXTRA_PKGS[@]}" || warn "Algún tool extra falló — revisá arriba."
+
+# pnpm: gestor de paquetes Node, vía su script oficial. Idempotente igual lo
+# salteamos si ya está. El script agrega PNPM_HOME al rc; para ESTA sesión lo
+# metemos al PATH a mano así carbon-now-cli se puede instalar a continuación.
+if ! has pnpm; then
+    info "Instalando pnpm (get.pnpm.io)..."
+    curl -fsSL https://get.pnpm.io/install.sh | sh - || warn "Install de pnpm falló."
+    export PNPM_HOME="${PNPM_HOME:-$HOME/.local/share/pnpm}"
+    case ":$PATH:" in *":$PNPM_HOME:"*) ;; *) export PATH="$PNPM_HOME:$PATH" ;; esac
+else
+    ok "pnpm ya instalado."
+fi
+
+# carbon-now-cli: imágenes de snippets de código (bin: carbon-now), como global de pnpm.
+if has pnpm && ! has carbon-now; then
+    info "Instalando carbon-now-cli (pnpm -g)..."
+    pnpm i -g carbon-now-cli \
+        || warn "pnpm i -g carbon-now-cli falló — si falta Node: pnpm env use --global lts"
 fi
 
 # === 4b. Hyprland (opcional, con --with-hyprland) ===
