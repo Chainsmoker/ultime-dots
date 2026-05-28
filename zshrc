@@ -23,6 +23,16 @@ command -v starship >/dev/null && eval "$(starship init zsh)"
 typeset -U path PATH          # dedup automático de entradas repetidas en PATH
 export PATH="$HOME/.local/bin:$PATH"
 
+# ── Arte en terminal (pokemon) al abrir kitty ───────────────────────────────
+# Disparador portable, INDEPENDIENTE de oh-my-zsh. Antes el arte colgaba sólo del
+# snippet de zsh-custom que sourcea omz; en un setup sin omz (p.ej. sólo starship)
+# nunca corría. En máquinas CON omz ese snippet ya lo disparó antes y comparten
+# el guard _TERM_ART_DONE, así que acá no se dibuja doble. Gated a kitty.
+if [[ -o interactive && -z "${_TERM_ART_DONE:-}" && -n "${KITTY_WINDOW_ID:-}" && -x "$HOME/.local/bin/term-fetch" ]]; then
+    _TERM_ART_DONE=1
+    "$HOME/.local/bin/term-fetch" 2>/dev/null || true
+fi
+
 # Aliases
 alias cat='bat --style=plain'
 alias l='eza -CF'
