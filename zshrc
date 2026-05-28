@@ -1,22 +1,41 @@
-# zshrc — Configuración de Zsh para ultime-dots (Nix-free)
+# zshrc — Configuración de Zsh para ultime-dots (Nix-free, sin oh-my-zsh)
 
-# Ruta a tu instalación de Oh My Zsh
-export ZSH="$HOME/.oh-my-zsh"
+# ── Núcleo zsh (reemplaza lo que antes daba oh-my-zsh) ───────────────────────
+# Historial
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+setopt extended_history hist_expire_dups_first hist_ignore_dups \
+       hist_ignore_space hist_verify inc_append_history share_history
 
-# Prompt: si starship está instalado lo usamos (ver init más abajo) y dejamos
-# que omz NO pinte su propio prompt; si no, cae al tema archcraft (portable).
-if command -v starship >/dev/null; then ZSH_THEME=""; else ZSH_THEME="archcraft"; fi
-plugins=(git sudo)
+# Opciones generales + keybindings estilo emacs (como omz por defecto)
+setopt auto_cd interactive_comments
+bindkey -e
 
-# Carpeta Oh My Zsh Custom (se linkea automáticamente a config/zsh-custom)
-export ZSH_CUSTOM="$ZSH/custom"
-
-# Cargar Oh My Zsh si está instalado (esto ya corre compinit)
-if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
-    source "$ZSH/oh-my-zsh.sh"
+# Completado: compinit DEBE correr antes de fzf-tab. Rebuild del dump como mucho
+# 1 vez al día; si no, se carga cacheado (-C) para que el arranque sea rápido.
+autoload -Uz compinit
+_zcd="$HOME/.zcompdump"
+if [[ -f "$_zcd" && -n "$(find "$_zcd" -mtime -1 2>/dev/null)" ]]; then
+    compinit -C -d "$_zcd"
+else
+    compinit -d "$_zcd"
 fi
+unset _zcd
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'   # case-insensitive
+zstyle ':completion:*' menu select                          # menú navegable
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"     # colores en el menú
+zstyle ':completion:*' group-name ''
 
-# Prompt starship (después de omz para que gane). Lee ~/.config/starship.toml.
+# sudo: doble ESC antepone/saca `sudo` a la línea actual (era el plugin `sudo`).
+sudo-command-line() {
+    [[ -z $BUFFER ]] && LBUFFER="$(fc -ln -1)"
+    if [[ $BUFFER == sudo\ * ]]; then LBUFFER="${LBUFFER#sudo }"; else LBUFFER="sudo $LBUFFER"; fi
+}
+zle -N sudo-command-line
+bindkey '\e\e' sudo-command-line
+
+# Prompt: starship (lee ~/.config/starship.toml).
 command -v starship >/dev/null && eval "$(starship init zsh)"
 
 # Exportar PATH y Editor por defecto
@@ -39,6 +58,32 @@ alias l='eza -CF'
 alias la='eza -A'
 alias ll='eza -alF'
 alias ls='eza --icons --group-directories-first'
+
+# Git — subset más usado del plugin `git` de oh-my-zsh (agregá los que te falten)
+alias g='git'
+alias gst='git status'
+alias gss='git status -s'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit -v'
+alias gcmsg='git commit -m'
+alias gca='git commit -v -a'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gsw='git switch'
+alias gb='git branch'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gp='git push'
+alias gpf='git push --force-with-lease'
+alias gl='git pull'
+alias gf='git fetch'
+alias glog='git log --oneline --decorate --graph'
+alias glola='git log --oneline --decorate --graph --all'
+alias grb='git rebase'
+alias grbi='git rebase -i'
+alias gsta='git stash'
+alias gstp='git stash pop'
 
 # ──────────────────────────────────────────────────────────────────────────
 # Plugins externos (nix-free). Se buscan en: clone local → pacman → nix store.

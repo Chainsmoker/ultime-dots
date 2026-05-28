@@ -31,8 +31,7 @@ ultime-dots/
     ├── kitty/, foot/         ← terminales
     ├── fuzzel/               ← launcher fallback
     ├── wlogout/              ← menú salir
-    ├── zshrc.d/              ← snippets bash/zsh (incluye fix kitty-terminfo)
-    ├── zsh-custom/           ← oh-my-zsh custom (cargado por zshrc)
+    ├── zshrc.d/              ← snippets zsh auto-sourced por zshrc (editor, shortcuts, fix kitty-terminfo)
     ├── fontconfig/           ← font fallbacks
     ├── xdg-desktop-portal/   ← portal Hyprland
     ├── mpv/                  ← video player

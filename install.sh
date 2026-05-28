@@ -25,7 +25,7 @@ done
 mkdir -p "$DST"
 
 # Carpetas que NO van a ~/.config (se manejan en bloques especiales abajo)
-declare -A SPECIAL_DIRS=( [zsh-custom]=1 [systemd]=1 )
+declare -A SPECIAL_DIRS=( [systemd]=1 )
 
 # === Carpetas: linkear archivo por archivo ===
 for dir in "$SRC"/*/; do
@@ -71,19 +71,6 @@ for file in "$SRC"/*; do
     ln -sf "$file" "$link"
     ok "linked $link"
 done
-
-# === Casos especiales: snippets que NO van a ~/.config ===
-ZSH_CUSTOM_SRC="$SRC/zsh-custom"
-if [[ -d "$ZSH_CUSTOM_SRC" && -d "$HOME/.oh-my-zsh/custom" ]]; then
-    for f in "$ZSH_CUSTOM_SRC"/*.zsh; do
-        [[ -e "$f" ]] || continue
-        fname=$(basename "$f")
-        link="$HOME/.oh-my-zsh/custom/$fname"
-        [[ -e "$link" && ! -L "$link" ]] && mv "$link" "$link.bak-$(date +%s)"
-        ln -sf "$f" "$link"
-        ok "linked $link"
-    done
-fi
 
 # === Linkear zshrc (para entornos sin Nix) ===
 ZSHRC_SRC="$REPO_ROOT/zshrc"
