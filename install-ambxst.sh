@@ -2,7 +2,8 @@
 # Editable Ambxst installer for Arch Linux.
 #
 # Differences vs the upstream installer (https://github.com/Axenide/Ambxst/blob/main/install.sh):
-#   - Clones to ~/Repos/Ambxst (override with $AMBXST_INSTALL_DIR).
+#   - Clones to ~/.local/share/Ambxst (override with $AMBXST_INSTALL_DIR).
+#     Si ya existe un clone legacy en ~/Repos/Ambxst, lo respeta (no duplica).
 #   - NEVER does `git reset --hard` — your edits are preserved.
 #   - Adds an `upstream` remote so you can `git fetch upstream` / `git rebase upstream/main`
 #     conventionally without losing changes.
@@ -40,7 +41,12 @@ done
 # Para upstream limpio: AMBXST_REPO_URL=https://github.com/Axenide/Ambxst.git AMBXST_BRANCH=main
 REPO_URL="${AMBXST_REPO_URL:-https://github.com/Chainsmoker/Ambxst.git}"
 UPSTREAM_URL="https://github.com/Axenide/Ambxst.git"
-INSTALL_DIR="${AMBXST_INSTALL_DIR:-$HOME/Repos/Ambxst}"
+# Default nuevo: ~/.local/share/Ambxst. Pero si ya existe un clone legacy en
+# ~/Repos/Ambxst (máquinas viejas, p.ej. la principal), lo respetamos para no
+# duplicar — así re-correr el instalador ahí no mueve nada.
+_AMBXST_DEFAULT_DIR="$HOME/.local/share/Ambxst"
+[[ -d "$HOME/Repos/Ambxst/.git" ]] && _AMBXST_DEFAULT_DIR="$HOME/Repos/Ambxst"
+INSTALL_DIR="${AMBXST_INSTALL_DIR:-$_AMBXST_DEFAULT_DIR}"
 LAUNCHER_DIR="${AMBXST_LAUNCHER_DIR:-$HOME/.local/bin}"
 BRANCH="${AMBXST_BRANCH:-main}"
 
@@ -114,6 +120,7 @@ PKGS=(
     zsh bat eza fzf fd
     # Apps / utils
     kitty tmux fuzzel network-manager-applet blueman
+    nautilus                      # file manager GUI ($files en hyprland.conf)
     pipewire wireplumber pavucontrol easyeffects ffmpeg x264 playerctl
     brightnessctl ddcutil fontconfig grim slurp imagemagick jq sqlite upower
     wl-clipboard wlsunset wtype zbar glib2 python-pipx zenity inetutils
@@ -126,7 +133,7 @@ PKGS=(
     noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-nerd-fonts-symbols
     ttf-phosphor-icons ttf-league-gothic
     # Themes + extras
-    adw-gtk-theme matugen gpu-screen-recorder wl-clip-persist mpvpaper gradia
+    adw-gtk-theme matugen gpu-screen-recorder wl-clip-persist mpvpaper
     # Go: para compilar axctl desde el fork con el fix de Hyprland 0.55+
     go
     # Tools de los dotfiles: prompt (zshrc), editor ($EDITOR=hx), screenshot annotator
@@ -197,7 +204,11 @@ fi
 # usan sintaxis Lua que Hyprland mainline rechaza. La branch en el fork lo arregla.
 AXCTL_REPO_URL="${AXCTL_REPO_URL:-https://github.com/Chainsmoker/axctl.git}"
 AXCTL_BRANCH="${AXCTL_BRANCH:-fix/hyprland-dispatcher}"
-AXCTL_INSTALL_DIR="${AXCTL_INSTALL_DIR:-$HOME/Repos/axctl}"
+# Igual que Ambxst: default ~/.local/share/axctl, con fallback al clone legacy
+# en ~/Repos/axctl si ya existe.
+_AXCTL_DEFAULT_DIR="$HOME/.local/share/axctl"
+[[ -d "$HOME/Repos/axctl/.git" ]] && _AXCTL_DEFAULT_DIR="$HOME/Repos/axctl"
+AXCTL_INSTALL_DIR="${AXCTL_INSTALL_DIR:-$_AXCTL_DEFAULT_DIR}"
 
 info "Instalando axctl desde $AXCTL_REPO_URL ($AXCTL_BRANCH)..."
 if [[ -d "$AXCTL_INSTALL_DIR/.git" ]]; then

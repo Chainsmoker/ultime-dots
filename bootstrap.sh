@@ -10,11 +10,15 @@
 #
 # Overrides opcionales:
 #   DOTFILES_REPO=https://github.com/<vos>/ultime-dots.git
-#   DOTFILES_DIR=$HOME/dotfiles
+#   DOTFILES_DIR=$HOME/.local/share/dotfiles
 set -euo pipefail
 
 REPO="${DOTFILES_REPO:-https://github.com/Chainsmoker/ultime-dots.git}"
-DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
+# Default nuevo: ~/.local/share/dotfiles. Si ya existe un clone legacy en
+# ~/dotfiles (la máquina principal), lo respetamos para no duplicar.
+_DEFAULT_DIR="$HOME/.local/share/dotfiles"
+[ -d "$HOME/dotfiles/.git" ] && _DEFAULT_DIR="$HOME/dotfiles"
+DIR="${DOTFILES_DIR:-$_DEFAULT_DIR}"
 
 command -v pacman >/dev/null || { echo "Este bootstrap es para Arch (pacman no encontrado)." >&2; exit 1; }
 command -v git >/dev/null || { echo "→ Instalando git..."; sudo pacman -S --needed --noconfirm git; }

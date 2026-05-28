@@ -65,8 +65,8 @@ curl -fsSL https://raw.githubusercontent.com/Chainsmoker/ultime-dots/main/bootst
 **O a mano**, dos pasos:
 
 ```bash
-git clone https://github.com/Chainsmoker/ultime-dots.git ~/dotfiles
-cd ~/dotfiles
+git clone https://github.com/Chainsmoker/ultime-dots.git ~/.local/share/dotfiles
+cd ~/.local/share/dotfiles
 
 # 1) Apps + Ambxst + matugen + fuentes (paquete grande).
 #    Agregá --with-hyprland si Hyprland todavía no está instalado.
@@ -76,7 +76,7 @@ bash install-ambxst.sh            # o: bash install-ambxst.sh --with-hyprland
 ./install.sh
 ```
 
-`install.sh` symlinkea `~/dotfiles/config/*` a `~/.config/*` (backupea lo existente como `*.bak-<timestamp>`), instala las deps del portal/picker y corre un `matugen` inicial para que los temas existan en el primer arranque. Cambiá la paleta cuando quieras con `wall <imagen>`.
+`install.sh` symlinkea `~/.local/share/dotfiles/config/*` a `~/.config/*` (backupea lo existente como `*.bak-<timestamp>`), instala las deps del portal/picker y corre un `matugen` inicial para que los temas existan en el primer arranque. Cambiá la paleta cuando quieras con `wall <imagen>`.
 
 ## Edición
 
@@ -89,7 +89,7 @@ $EDITOR ~/.config/hypr/hyprland.conf
 Cuando guardás, estás editando este repo. Después:
 
 ```bash
-cd ~/dotfiles
+cd ~/.local/share/dotfiles   # en la máquina principal puede ser ~/dotfiles (clone legacy)
 git add -A && git commit -m "tweak: ..."
 git push
 ```

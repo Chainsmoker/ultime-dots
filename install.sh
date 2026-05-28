@@ -137,6 +137,8 @@ fi
 #
 # Instala lo necesario para que el pipeline funcione end-to-end:
 #   - File picker: yazi + previews (ffmpeg, poppler, ffmpegthumbnailer, librsvg)
+#   - GUI picker / "Save as…": yad (backend por defecto de bin/ambxst-pick y del
+#     botón Save-as del overlay de screenshot — GTK3, diálogo propio con nombre editable)
 #   - Portal File Picker: xdg-desktop-portal-termfilechooser (AUR)
 #   - Bridge matugen → Qt: kde-material-you-colors (AUR)
 #
@@ -146,7 +148,7 @@ if [[ "$SKIP_PACKAGES" -eq 1 ]]; then
 elif ! command -v pacman >/dev/null; then
     warn "pacman no encontrado — esta distro no es Arch-like. Saltando paquetes."
 else
-    PACMAN_PKGS=(yazi ffmpeg poppler ffmpegthumbnailer librsvg)
+    PACMAN_PKGS=(yazi yad ffmpeg poppler ffmpegthumbnailer librsvg)
     AUR_PKGS=(xdg-desktop-portal-termfilechooser kde-material-you-colors)
 
     # Filtrar a los que NO están instalados
