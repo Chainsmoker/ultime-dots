@@ -121,7 +121,10 @@ PKGS=(
     # Apps / utils
     kitty tmux fuzzel network-manager-applet blueman
     nautilus                      # file manager GUI ($files en hyprland.conf)
-    pipewire wireplumber pavucontrol easyeffects ffmpeg x264 playerctl
+    pipewire wireplumber pavucontrol ffmpeg x264 playerctl
+    # (El ecualizador usa un filter-chain nativo de PipeWire — ver
+    #  config/pipewire/pipewire.conf.d/99-ambxst-eq.conf. Ya no se usa EasyEffects:
+    #  su CLI no aplica el DSP en v8 y competía por el sink default.)
     brightnessctl ddcutil fontconfig grim slurp imagemagick jq sqlite upower
     wl-clipboard wlsunset wtype zbar glib2 python-pipx zenity inetutils
     power-profiles-daemon python312 libnotify

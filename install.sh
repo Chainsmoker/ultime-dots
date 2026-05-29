@@ -25,7 +25,9 @@ done
 mkdir -p "$DST"
 
 # Carpetas que NO van a ~/.config (se manejan en bloques especiales abajo)
-declare -A SPECIAL_DIRS=( [systemd]=1 )
+# pipewire tiene subdir pipewire.conf.d/ → linkeo archivo por archivo (como
+# systemd) para no symlinkear el drop-in dir entero.
+declare -A SPECIAL_DIRS=( [systemd]=1 [pipewire]=1 )
 
 # === Carpetas: linkear archivo por archivo ===
 for dir in "$SRC"/*/; do
@@ -101,6 +103,25 @@ if [[ -d "$SYSTEMD_SRC" ]]; then
     done < <(find "$SYSTEMD_SRC" -type f -print0)
     # Recargar systemd para que reconozca units/overrides nuevos
     systemctl --user daemon-reload 2>/dev/null || true
+fi
+
+# === pipewire (preserva subdir pipewire.conf.d/ — drop-ins archivo por archivo) ===
+# Incluye 99-ambxst-eq.conf: el filter-chain del ecualizador de 10 bandas.
+PIPEWIRE_SRC="$SRC/pipewire"
+PIPEWIRE_DST="$DST/pipewire"
+if [[ -d "$PIPEWIRE_SRC" ]]; then
+    while IFS= read -r -d '' file; do
+        rel="${file#"$PIPEWIRE_SRC"/}"
+        link="$PIPEWIRE_DST/$rel"
+        mkdir -p "$(dirname "$link")"
+        if [[ -e "$link" && ! -L "$link" ]]; then
+            mv "$link" "$link.bak-$(date +%s)"
+        fi
+        ln -sfn "$file" "$link"
+        ok "linked $link"
+    done < <(find "$PIPEWIRE_SRC" -type f -print0)
+    # El ecualizador necesita que PipeWire recargue para crear el sink "Ambxst EQ".
+    systemctl --user restart pipewire.service 2>/dev/null || true
 fi
 
 # === bin/ → ~/.local/bin/ (scripts ejecutables) ===
